@@ -5,3 +5,7 @@ def getTransform():
         transforms.ToTensor(),
         transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
     ])
+
+def count(iter):
+    return sum(1 for _ in iter)
+

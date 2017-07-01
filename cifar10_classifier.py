@@ -1,8 +1,5 @@
 import torch
 import torchvision
-#import torchvision.transforms as transforms
-import matplotlib.pyplot as plt
-import numpy as np
 
 from torch.autograd import Variable
 import torch.nn as nn
@@ -13,23 +10,6 @@ from datautils import getTransform
 
 from torch.utils.data.sampler import RandomSampler, SubsetRandomSampler
 
-def imshow(img):
-    img = img/2 + 0.5
-    npimg = img.numpy()
-    np.transpose(npimg, (1, 2, 0))
-    plt.imshow(np.transpose(npimg, (1, 2, 0)))
-    plt.show()
-
-
-def plotshow(x, y):
-    x = np.arange(0, 3 * np.pi, 0.1)
-    y = np.sin(x)
-
-    plt.plot(x, y)
-    plt.show()
-
-def count(iter):
-    return sum(1 for _ in iter)
 
 
 class MxyCifarClassifierNet(nn.Module):
@@ -64,11 +44,8 @@ transform = getTransform()
 trainset = torchvision.datasets.CIFAR10(root='/media/maxiaoyu/datastore/training_data',
                                         train=True, download=True, transform=transform)
 
-
 trainloader = torch.utils.data.DataLoader(trainset, batch_size=MINI_BATCH_SIZE,
                                           shuffle=True, num_workers=2)
-
-
 
 TEST_BATCH_SIZE = 4
 testset = torchvision.datasets.CIFAR10(root='/media/maxiaoyu/datastore/training_data', train=False,
@@ -77,28 +54,6 @@ testset = torchvision.datasets.CIFAR10(root='/media/maxiaoyu/datastore/training_
 testloader = torch.utils.data.DataLoader(testset, batch_size=TEST_BATCH_SIZE,
                                          shuffle=False, num_workers=2)
 
-
-"""
-# print(count(trainset))
-# tempdata = enumerate(trainloader)
-# print(count(tempdata)) 5000
-
-
-classes = ('plane', 'car', 'bird', 'cat',
-           'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
-
-# dataiter = iter(trainloader)
-# images, labels = dataiter.next()
-
-
-# show img, but is a block operation
-# imshow(torchvision.utils.make_grid(images))
-
-
-# plotshow(10, 20)
-
-
-"""
 net = MxyCifarClassifierNet()
 net.cuda()
 
@@ -138,20 +93,11 @@ for epoch in range(EPOCH_NUM):
                       (epoch + 1, index + 1, val_loss / 1000))
                 val_loss = 0.0
 
-
 print('Finished Training')
 
 print('start test')
 
-"""
-dataiter = iter(testloader)
-images, labels = dataiter.next()
-print('GroundTruth: ', ' '.join('%5s' % classes[labels[j]] for j in range(TEST_BATCH_SIZE)))
-test_outputs = net(Variable(images.cuda()))
-_, predicted = torch.max(test_outputs.data, 1)
-print('Predicted: ', ' '.join('%5s' % classes[predicted[j][0]]
-                              for j in range(TEST_BATCH_SIZE)))
-"""
+
 correct = 0
 total = 0
 
@@ -163,10 +109,11 @@ for data in testloader:
     local_count = 0
 
     for j in range(TEST_BATCH_SIZE):
-        if(labels[j] == predicted[j][0]):
+        if labels[j] == predicted[j][0]:
             correct += 1
 
 print('Accuracy of the network on the 10000 test images: %d %%' % (
     100 * correct / total))
 
 
+input("Press [enter] to exit")
