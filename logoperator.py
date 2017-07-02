@@ -15,11 +15,42 @@ def SaveLog(epoch, sample_num, training_loss, validation_loss, test_accurate):
 
 
 
+def ReadLogByLineNum(line_num):
+    print('read line num = ', line_num)
+    with open('/media/maxiaoyu/datastore/Log/running.log', 'rb') as f:
+        fcntl.flock(f, fcntl.LOCK_EX)
+        for i, line in enumerate(f):
+            print('real i = ', i)
+
+            if i == line_num:
+                print('get line num = ', i)
+                if line.__len__() > 0:
+                    epoch, m, training_loss, validation_loss, test_accurate = str(line.strip()).split(',')
+                    epoch = int(epoch[2:])
+                    m = int(m)
+                    training_loss = float(training_loss)
+                    validation_loss = float(validation_loss)
+                    test_accurate = float(test_accurate[:-1])
+
+                    return epoch, m, training_loss, validation_loss, test_accurate
+
+                else:
+                    epoch = -1
+                    m, training_loss, validation_loss, test_accurate = 0, 0, 0, 0
+                    return epoch, m, training_loss, validation_loss, test_accurate
+
+        epoch = -1
+        m, training_loss, validation_loss, test_accurate = 0, 0, 0, 0
+        return epoch, m, training_loss, validation_loss, test_accurate
+
+
+
+
 
 
 def ReadLog():
-    #q = Path('/media/maxiaoyu/datastore/Log/running.log')
     with open('/media/maxiaoyu/datastore/Log/running.log', 'rb') as f:
+        fcntl.flock(f, fcntl.LOCK_EX)
         #first = f.readline()  # Read the first line.
         for last in f:
             pass

@@ -4,10 +4,10 @@ import threading
 import random
 
 from pathlib import Path
-from logoperator import ReadLog
+from logoperator import ReadLog, ReadLogByLineNum
 
 
-q = Path('/media/maxiaoyu/datastore/somefile.txt')
+
 
 
 
@@ -17,6 +17,8 @@ class PlotThread():
         self.data2 = [0]
         self.x = [0]
 
+        self.line_num = 0
+
         thread = threading.Thread(target=self.runCall)
         thread.daemon = True
         thread.start()
@@ -25,8 +27,8 @@ class PlotThread():
         plt.figure()
         ln, = plt.plot([])
         ln2, = plt.plot([])
-        plt.ylim(0, 5)
-        plt.xlim(0, 10, 1)
+        plt.ylim(0, 2)
+        plt.xlim(1, 50, 1)
         plt.ion()
         plt.show()
         while True:
@@ -36,20 +38,30 @@ class PlotThread():
             ln2.set_xdata(self.x)
             ln2.set_ydata(self.data2)
             plt.draw()
-            print('3')
+
 
 
     def runCall(self):
         count = 0
-        print('22')
         time.sleep(1)
+
+
         while True:
-            count += 1
+            print('line_num = ', self.line_num)
             time.sleep(1)
-            self.data.append(random.random())
-            self.data2.append(random.random() * 2)
-            self.x.append(count)
-            print('1')
+            epoch, m, training_loss, validation_loss, test_accurate = ReadLogByLineNum(self.line_num)
+            if epoch == -1:
+                pass
+            else:
+                #training loss
+                self.data.append(training_loss)
+                #validation loss
+                self.data2.append(validation_loss)
+                #x
+                self.x.append(self.line_num)
+                self.line_num += 1
+                print('show pic')
+
 
 
 

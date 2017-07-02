@@ -38,7 +38,7 @@ class MxyCifarClassifierNet(nn.Module):
         return x
 
 MINI_BATCH_SIZE = 10
-EPOCH_NUM = 30
+EPOCH_NUM = 50
 
 transform = getTransform()
 
