@@ -9,6 +9,7 @@ import torch.optim as optim
 from datautils import getTransform
 
 from torch.utils.data.sampler import RandomSampler, SubsetRandomSampler
+from logoperator import SaveLog
 
 
 
@@ -37,7 +38,7 @@ class MxyCifarClassifierNet(nn.Module):
         return x
 
 MINI_BATCH_SIZE = 10
-EPOCH_NUM = 2
+EPOCH_NUM = 30
 
 transform = getTransform()
 
@@ -64,6 +65,10 @@ optimizer = optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
 for epoch in range(EPOCH_NUM):
     running_loss = 0.0
     val_loss = 0.0
+    computed_training_loss = 0
+    computed_val_loss = 0
+    test_accurate = 0
+    #training
     for index, data in enumerate(trainloader):
         if index < 4000:
             inputs, targets = data
@@ -80,6 +85,7 @@ for epoch in range(EPOCH_NUM):
             if index % 2000 == 1999:
                 print('[%d, %5d] training loss: %.3f' %
                       (epoch + 1, index + 1, running_loss / 2000))
+                computed_training_loss = running_loss / 2000
                 running_loss = 0.0
 
         if index >= 4000:
@@ -91,29 +97,39 @@ for epoch in range(EPOCH_NUM):
             if index % 1000 == 999:
                 print('[%d, %5d] validation loss: %.3f' %
                       (epoch + 1, index + 1, val_loss / 1000))
+                computed_val_loss = val_loss / 1000
                 val_loss = 0.0
 
-print('Finished Training')
+    # print epoch loss
+    print('training loss = %.3f, validation loss = %0.3f' % (computed_training_loss, computed_val_loss))
 
-print('start test')
+
+    # epoch test
+    correct = 0
+    total = 0
+
+    for data in testloader:
+        images, labels = data
+        outputs = net(Variable(images.cuda()))
+        _, predicted = torch.max(outputs.data, 1)
+        total += labels.size(0)
+        local_count = 0
+
+        for j in range(TEST_BATCH_SIZE):
+            if labels[j] == predicted[j][0]:
+                correct += 1
+    test_accurate = 100 * correct / total
+    print('Accuracy of the network on the 10000 test images: %d %%' % (
+        100 * correct / total))
+
+    #save log
+    SaveLog(epoch + 1, 5000, computed_training_loss, computed_val_loss, test_accurate)
+    print('save log end')
 
 
-correct = 0
-total = 0
 
-for data in testloader:
-    images, labels = data
-    outputs = net(Variable(images.cuda()))
-    _, predicted = torch.max(outputs.data, 1)
-    total += labels.size(0)
-    local_count = 0
 
-    for j in range(TEST_BATCH_SIZE):
-        if labels[j] == predicted[j][0]:
-            correct += 1
 
-print('Accuracy of the network on the 10000 test images: %d %%' % (
-    100 * correct / total))
 
 
 input("Press [enter] to exit")
