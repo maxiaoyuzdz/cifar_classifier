@@ -2,8 +2,8 @@ from pathlib import Path
 import fcntl
 
 
-def SaveLog(epoch, sample_num, training_loss, validation_loss, test_accurate):
-    with open('/media/maxiaoyu/datastore/Log/running.log', 'a') as the_file:
+def SaveLog(epoch, sample_num, training_loss, validation_loss, test_accurate, log_file_name):
+    with open('/media/maxiaoyu/datastore/Log/' + log_file_name + '.log', 'a') as the_file:
         fcntl.flock(the_file, fcntl.LOCK_EX)
         the_file.write(str(epoch) +
                        ',' +
@@ -15,15 +15,15 @@ def SaveLog(epoch, sample_num, training_loss, validation_loss, test_accurate):
 
 
 
-def ReadLogByLineNum(line_num):
-    print('read line num = ', line_num)
-    with open('/media/maxiaoyu/datastore/Log/running.log', 'rb') as f:
+def ReadLogByLineNum(line_num, log_file_name):
+    #print('read line num = ', line_num)
+    with open('/media/maxiaoyu/datastore/Log/' + log_file_name + '.log', 'rb') as f:
         fcntl.flock(f, fcntl.LOCK_EX)
         for i, line in enumerate(f):
-            print('real i = ', i)
+            #print('real i = ', i)
 
             if i == line_num:
-                print('get line num = ', i)
+                #print('get line num = ', i)
                 if line.__len__() > 0:
                     epoch, m, training_loss, validation_loss, test_accurate = str(line.strip()).split(',')
                     epoch = int(epoch[2:])
@@ -48,8 +48,8 @@ def ReadLogByLineNum(line_num):
 
 
 
-def ReadLog():
-    with open('/media/maxiaoyu/datastore/Log/running.log', 'rb') as f:
+def ReadLog(log_file_name):
+    with open('/media/maxiaoyu/datastore/Log/' + log_file_name + '.log', 'rb') as f:
         fcntl.flock(f, fcntl.LOCK_EX)
         #first = f.readline()  # Read the first line.
         for last in f:

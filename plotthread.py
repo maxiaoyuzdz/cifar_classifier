@@ -1,13 +1,10 @@
 import matplotlib.pyplot as plt
 import time
 import threading
-import random
 
-from pathlib import Path
+
+
 from logoperator import ReadLog, ReadLogByLineNum
-
-
-
 
 
 
@@ -28,7 +25,7 @@ class PlotThread():
         ln, = plt.plot([])
         ln2, = plt.plot([])
         plt.ylim(0, 2)
-        plt.xlim(1, 50, 1)
+        plt.xlim(1, 300, 1)
         plt.ion()
         plt.show()
         while True:
@@ -39,15 +36,11 @@ class PlotThread():
             ln2.set_ydata(self.data2)
             plt.draw()
 
-
-
     def runCall(self):
-        count = 0
         time.sleep(1)
 
-
         while True:
-            print('line_num = ', self.line_num)
+            #print('line_num = ', self.line_num)
             time.sleep(1)
             epoch, m, training_loss, validation_loss, test_accurate = ReadLogByLineNum(self.line_num)
             if epoch == -1:
@@ -60,10 +53,16 @@ class PlotThread():
                 #x
                 self.x.append(self.line_num)
                 self.line_num += 1
-                print('show pic')
+                #print('show pic')
+
+
+
+def main():
+    pt = PlotThread()
 
 
 
 
+if __name__ == '__main__':
+    main()
 
-pt = PlotThread()
