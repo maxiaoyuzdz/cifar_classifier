@@ -36,7 +36,7 @@ class MxyCifarClassifierNet(nn.Module):
 
         return x
 
-
+#global variable
 EPOCH_NUM = 400
 MINI_BATCH_SIZE = 10
 TEST_BATCH_SIZE = 4
@@ -162,5 +162,6 @@ if __name__ == '__main__':
     print('log file name = ', LOG_FILE_NAME)
 
     input('Press [ENTER] to run ')
+
 
     runtraining()
