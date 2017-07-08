@@ -3,7 +3,7 @@ import fcntl
 
 
 def SaveLog(epoch, sample_num, training_loss, validation_loss, test_accurate, log_file_name):
-    with open('/media/maxiaoyu/datastore/Log/' + log_file_name + '.log', 'a') as the_file:
+    with open(log_file_name, 'a') as the_file:
         fcntl.flock(the_file, fcntl.LOCK_EX)
         the_file.write(str(epoch) +
                        ',' +
@@ -52,11 +52,7 @@ def ReadAllLossLog(log_file_name):
         for i, line in enumerate(f):
             if line is not 'END':
                 epoch, m, training_loss, validation_loss, test_accurate = str(line.strip()).split(',')
-                #print(int(epoch[2:]))
-                #print(m)
-                #print(float(training_loss))
-                #print(float(validation_loss))
-                #print(float(test_accurate[:-1]))
+
                 epoch = int(epoch[2:])
                 m = int(m)
                 training_loss = float(training_loss)

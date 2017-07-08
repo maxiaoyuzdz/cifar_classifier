@@ -1,47 +1,26 @@
 import sys
+import argparse
 import torch
 import torchvision
 
 from torch.autograd import Variable
 import torch.nn as nn
-import torch.nn.functional as F
 import torch.optim as optim
 
 from datautils import getTransform
-
 from torch.utils.data.sampler import RandomSampler, SubsetRandomSampler
 from logoperator import SaveLog
 
+from cifarclassifier import Cifar10Classifier
 
 
-class MxyCifarClassifierNet(nn.Module):
-    def __init__(self):
-        super(MxyCifarClassifierNet, self).__init__()
-        #layer setting
-        self.conv1 = nn.Conv2d(3, 9, 5)
-        self.pool = nn.MaxPool2d(2, 2)
-        self.conv2 = nn.Conv2d(9, 16, 5)
-        self.fc1 = nn.Linear(16 * 5 * 5, 120)
-        self.fc2 = nn.Linear(120, 84)
-        self.fc3 = nn.Linear(84, 10)
-
-    def forward(self, x):
-        x = self.pool(F.relu(self.conv1(x)))
-        x = self.pool(F.relu(self.conv2(x)))
-
-        x = x.view(-1, 16 * 5 * 5)
-        x = F.relu(self.fc1(x))
-        x = F.relu(self.fc2(x))
-        x = self.fc3(x)
-
-        return x
-
-#global variable
-EPOCH_NUM = 400
-MINI_BATCH_SIZE = 10
-TEST_BATCH_SIZE = 4
-LEARNING_RATE = 0.01
-LOG_FILE_NAME = 'running'
+parser = argparse.ArgumentParser(description='Process training arguments')
+parser.add_argument('-e', '--epoch', default=300, type=int)
+parser.add_argument('-mb', '--mini_batch_size', default=10, type=int)
+parser.add_argument('-tb', '--test_batch_size', default=4, type=int)
+parser.add_argument('-lr', '--learning_rate', default=0.01, type=float)
+parser.add_argument('-logdir', '--log_dir', default='/media/maxiaoyu/datastore/Log/')
+parser.add_argument('-log', '--log_file_name', default='running.log')
 
 
 def adjustlearningrate(op, blr, epoch):
@@ -51,37 +30,30 @@ def adjustlearningrate(op, blr, epoch):
         param_group['lr'] = lr
 
 
-def runtraining():
+def runtraining(epoch_num, mini_batch_size, test_batch_size, learning_rate, log_path):
     transform = getTransform()
-
     trainset = torchvision.datasets.CIFAR10(root='/media/maxiaoyu/datastore/training_data',
                                             train=True, download=True, transform=transform)
-
-    trainloader = torch.utils.data.DataLoader(trainset, batch_size=MINI_BATCH_SIZE,
+    trainloader = torch.utils.data.DataLoader(trainset, batch_size=mini_batch_size,
                                               shuffle=True, num_workers=2)
-
     testset = torchvision.datasets.CIFAR10(root='/media/maxiaoyu/datastore/training_data', train=False,
                                            download=True, transform=transform)
-
-    testloader = torch.utils.data.DataLoader(testset, batch_size=TEST_BATCH_SIZE,
+    testloader = torch.utils.data.DataLoader(testset, batch_size=test_batch_size,
                                              shuffle=False, num_workers=2)
 
-    net = MxyCifarClassifierNet()
+    net = Cifar10Classifier()
     net.cuda()
 
     criterion = nn.CrossEntropyLoss()
-    optimizer = optim.SGD(net.parameters(), lr=LEARNING_RATE, momentum=0.9)
+    optimizer = optim.SGD(net.parameters(), lr=learning_rate, momentum=0.9)
 
-
-    for epoch in range(EPOCH_NUM):
+    for epoch in range(epoch_num):
         running_loss = 0.0
         val_loss = 0.0
         computed_training_loss = 0
         computed_val_loss = 0
-        test_accurate = 0
-
         #adjust learning rate
-        adjustlearningrate(optimizer, LEARNING_RATE, epoch)
+        adjustlearningrate(optimizer, learning_rate, epoch)
 
         #training
         for index, data in enumerate(trainloader):
@@ -128,9 +100,8 @@ def runtraining():
             outputs = net(Variable(images.cuda()))
             _, predicted = torch.max(outputs.data, 1)
             total += labels.size(0)
-            local_count = 0
 
-            for j in range(TEST_BATCH_SIZE):
+            for j in range(test_batch_size):
                 if labels[j] == predicted[j][0]:
                     correct += 1
         test_accurate = 100 * correct / total
@@ -138,33 +109,25 @@ def runtraining():
             100 * correct / total))
 
         #save log
-        SaveLog(epoch + 1, 5000, computed_training_loss, computed_val_loss, test_accurate, LOG_FILE_NAME)
+        SaveLog(epoch + 1, 5000, computed_training_loss, computed_val_loss, test_accurate, log_path)
         print('save log end')
 
 
 
 
 
+def main():
+    global args
+    args = parser.parse_args()
+    print(args.log_dir + args.log_file_name)
+
+    runtraining(args.epoch, args.mini_batch_size, args.test_batch_size, args.learning_rate, args.log_dir + args.log_file_name)
 
 
 if __name__ == '__main__':
-    #setting arguments
-    EPOCH_NUM = int(sys.argv[1])
-    MINI_BATCH_SIZE = int(sys.argv[2])
-    TEST_BATCH_SIZE = int(sys.argv[3])
-    LEARNING_RATE = float(sys.argv[4])
-    LOG_FILE_NAME = sys.argv[5]
-
-    if str(LOG_FILE_NAME).split('/').__len__() == 1:
-        LOG_FILE_NAME = '/media/maxiaoyu/datastore/Log/' + str(LOG_FILE_NAME)
-
-    print('epoch num = ', EPOCH_NUM)
-    print('mini batch size = ', MINI_BATCH_SIZE)
-    print('test batch size = ', TEST_BATCH_SIZE)
-    print('learning rate = ', LEARNING_RATE)
-    print('log file name = ', LOG_FILE_NAME)
-
-    input('Press [ENTER] to run ')
+    main()
 
 
-    runtraining()
+
+
+
