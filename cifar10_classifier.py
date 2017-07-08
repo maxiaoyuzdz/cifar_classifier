@@ -25,7 +25,7 @@ parser.add_argument('-log', '--log_file_name', default='running.log')
 
 def adjustlearningrate(op, blr, epoch):
     lr = blr * 0.1 ** (epoch // 30)
-    print('new lr = ', lr, ' old lr = ', blr, ' epoch = ',epoch)
+    print('new lr = ', lr, ' old lr = ', blr, ' epoch = ', epoch)
     for param_group in op.param_groups:
         param_group['lr'] = lr
 
@@ -53,7 +53,7 @@ def runtraining(epoch_num, mini_batch_size, test_batch_size, learning_rate, log_
         computed_training_loss = 0
         computed_val_loss = 0
         #adjust learning rate
-        adjustlearningrate(optimizer, learning_rate, epoch)
+        #adjustlearningrate(optimizer, learning_rate, epoch)
 
         #training
         for index, data in enumerate(trainloader):
