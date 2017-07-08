@@ -155,6 +155,9 @@ if __name__ == '__main__':
     LEARNING_RATE = float(sys.argv[4])
     LOG_FILE_NAME = sys.argv[5]
 
+    if str(LOG_FILE_NAME).split('/').__len__() == 1:
+        LOG_FILE_NAME = '/media/maxiaoyu/datastore/Log/' + str(LOG_FILE_NAME)
+
     print('epoch num = ', EPOCH_NUM)
     print('mini batch size = ', MINI_BATCH_SIZE)
     print('test batch size = ', TEST_BATCH_SIZE)

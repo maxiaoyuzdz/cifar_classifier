@@ -165,6 +165,7 @@ def showgraphicstaically(file_name):
 
     else:
         print('no file exists')
+        pass
 
 
 
@@ -187,6 +188,10 @@ def main():
 if __name__ == '__main__':
     WORK_TYPE = sys.argv[1]
     LOG_FILE_NAME = sys.argv[2]
+
+    if str(LOG_FILE_NAME).split('/').__len__() == 1:
+        LOG_FILE_NAME = '/media/maxiaoyu/datastore/Log/' + str(LOG_FILE_NAME)
+
     if sys.argv.__len__() > 3:
         EPOCH_NUM = int(sys.argv[3])
     if sys.argv.__len__() > 4:
