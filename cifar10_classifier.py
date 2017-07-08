@@ -11,7 +11,7 @@ from datautils import getTransform
 from torch.utils.data.sampler import RandomSampler, SubsetRandomSampler
 from logoperator import SaveLog
 
-from cifarclassifier import Cifar10Classifier
+from cifarclassifier import Cifar10Classifier, Cifar10ClassifierV1
 
 
 parser = argparse.ArgumentParser(description='Process training arguments')
@@ -24,7 +24,7 @@ parser.add_argument('-log', '--log_file_name', default='running.log')
 
 
 def adjustlearningrate(op, blr, epoch):
-    lr = blr * 0.1 ** (epoch // 20)
+    lr = blr * 0.1 ** (epoch // 30)
     print('new lr = ', lr, ' old lr = ', blr, ' epoch = ',epoch)
     for param_group in op.param_groups:
         param_group['lr'] = lr
@@ -41,7 +41,7 @@ def runtraining(epoch_num, mini_batch_size, test_batch_size, learning_rate, log_
     testloader = torch.utils.data.DataLoader(testset, batch_size=test_batch_size,
                                              shuffle=False, num_workers=2)
 
-    net = Cifar10Classifier()
+    net = Cifar10ClassifierV1()
     net.cuda()
 
     criterion = nn.CrossEntropyLoss()
