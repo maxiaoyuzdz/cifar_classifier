@@ -119,7 +119,7 @@ def runtraining(epoch_num, mini_batch_size, test_batch_size, learning_rate, log_
 def main():
     global args
     args = parser.parse_args()
-    print(args.log_dir + args.log_file_name)
+    #print(args.log_dir + args.log_file_name)
 
     runtraining(args.epoch, args.mini_batch_size, args.test_batch_size, args.learning_rate, args.log_dir + args.log_file_name)
 

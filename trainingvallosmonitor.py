@@ -1,14 +1,17 @@
 import sys
 import os.path
+import argparse
 import matplotlib.pyplot as plt
 import time
 import threading
 from logoperator import ReadLossLogByLineNum, ReadAllLossLog
 
-WORK_TYPE = 's'
-LOG_FILE_NAME = ''
-EPOCH_NUM = 300
-LOSS_MAX = 2
+parser = argparse.ArgumentParser(description='Process training arguments')
+parser.add_argument('-t', '--work_type', default='s')
+parser.add_argument('-e', '--epoch_num', default=300, type=int)
+parser.add_argument('-lm', '--loss_max', default=2, type=int)
+parser.add_argument('-logdir', '--log_dir', default='/media/maxiaoyu/datastore/Log/')
+parser.add_argument('-log', '--log_file_name', default='running.log')
 
 epoch_data = []
 training_loss_data = []
@@ -72,15 +75,14 @@ def updatedata(log_file_name):
 def showgraphicdynamically(file_name):
     global training_line
     global validation_line
-    global LOSS_MAX
-    global EPOCH_NUM
+    global args
 
     # draw graphic
     plt.figure()
     training_line, = plt.plot([])
     validation_line, = plt.plot([])
-    plt.ylim(0, LOSS_MAX)
-    plt.xlim(1, EPOCH_NUM)
+    plt.ylim(0, args.loss_max)
+    plt.xlim(1, args.epoch_num)
     plt.xlabel('epoch')
     plt.ylabel('loss')
     plt.title('learning curve')
@@ -126,8 +128,8 @@ def showgraphicstaically(file_name):
 
         global training_line
         global validation_line
-        global LOSS_MAX
-        global EPOCH_NUM
+
+        global args
 
         global epoch_data
         global training_loss_data
@@ -142,8 +144,8 @@ def showgraphicstaically(file_name):
         plt.figure()
         training_line, = plt.plot([])
         validation_line, = plt.plot([])
-        plt.ylim(0, LOSS_MAX)
-        plt.xlim(1, EPOCH_NUM)
+        plt.ylim(0, args.loss_max)
+        plt.xlim(1, args.epoch_num)
         plt.xlabel('epoch')
         plt.ylabel('loss')
         plt.title('learning curve')
@@ -158,7 +160,6 @@ def showgraphicstaically(file_name):
         plt.draw()
         plt.pause(1)
 
-
         thread = threading.Thread(target=updatestaticdata())
         thread.daemon = True
         thread.start()
@@ -172,29 +173,22 @@ def showgraphicstaically(file_name):
 
 
 def main():
+    global args
+    args = parser.parse_args()
+
+
     print('draw graphic')
     # do drmatically drawing
-    if WORK_TYPE == 's':
-        showgraphicstaically(LOG_FILE_NAME)
+    if args.work_type == 's':
+        showgraphicstaically(args.log_dir + args.log_file_name)
         while True:
             time.sleep(1)
 
     #draw static graphic
-    if WORK_TYPE == 'd':
-        showgraphicdynamically(LOG_FILE_NAME)
-
+    if args.work_type == 'd':
+        showgraphicdynamically(args.log_dir + args.log_file_name)
 
 
 if __name__ == '__main__':
-    WORK_TYPE = sys.argv[1]
-    LOG_FILE_NAME = sys.argv[2]
-
-    if str(LOG_FILE_NAME).split('/').__len__() == 1:
-        LOG_FILE_NAME = '/media/maxiaoyu/datastore/Log/' + str(LOG_FILE_NAME)
-
-    if sys.argv.__len__() > 3:
-        EPOCH_NUM = int(sys.argv[3])
-    if sys.argv.__len__() > 4:
-        LOSS_MAX = int(sys.argv[4])
     main()
 
