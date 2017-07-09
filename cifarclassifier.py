@@ -1,7 +1,7 @@
 import torch.nn as nn
 import torch.nn.functional as F
 
-
+# official tutorial model
 class Cifar10Classifier(nn.Module):
     def __init__(self):
         super(Cifar10Classifier, self).__init__()
@@ -24,6 +24,7 @@ class Cifar10Classifier(nn.Module):
 
         return x
 
+# update version 1
 class Cifar10ClassifierV1(nn.Module):
     def __init__(self):
         super(Cifar10ClassifierV1, self).__init__()
@@ -35,7 +36,6 @@ class Cifar10ClassifierV1(nn.Module):
         self.fc2 = nn.Linear(120, 84)
         self.fc3 = nn.Linear(84, 10)
 
-
     def forward(self, x):
         x = self.pool(F.relu(self.conv1(x)))
         x = self.pool(F.relu(self.conv2(x)))
@@ -46,3 +46,5 @@ class Cifar10ClassifierV1(nn.Module):
         x = self.fc3(x)
 
         return x
+
+

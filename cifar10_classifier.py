@@ -19,15 +19,32 @@ parser.add_argument('-e', '--epoch', default=300, type=int)
 parser.add_argument('-mb', '--mini_batch_size', default=10, type=int)
 parser.add_argument('-tb', '--test_batch_size', default=4, type=int)
 parser.add_argument('-lr', '--learning_rate', default=0.01, type=float)
+parser.add_argument('-al', '--adjust_lr', default=0, type=int)
+parser.add_argument('-ap', '--adjust_period', default=10, type=int)
+parser.add_argument('-ar', '--adjust_rate', default=0.1, type=float)
+
 parser.add_argument('-logdir', '--log_dir', default='/media/maxiaoyu/datastore/Log/')
 parser.add_argument('-log', '--log_file_name', default='running.log')
 
 
-def adjustlearningrate(op, blr, epoch):
-    lr = blr * 0.1 ** (epoch // 30)
-    print('new lr = ', lr, ' old lr = ', blr, ' epoch = ', epoch)
+def adjustlearningrate1(op, blr, rate, epoch, p):
+    lr = blr * (rate ** (epoch // p))
+    print('new lr = ', lr, ' basic lr = ', blr, ' epoch = ', epoch)
     for param_group in op.param_groups:
         param_group['lr'] = lr
+
+def adjustlearningrate2():
+    pass
+
+
+def adjustlearningratecontrol(op, epoch):
+    global args
+    if args.adjust_lr == 0:
+        pass
+    elif args.adjust_lr == 1:
+        adjustlearningrate1(op, args.learning_rate, args.adjust_rate, epoch, args.adjust_period)
+
+
 
 
 def runtraining(epoch_num, mini_batch_size, test_batch_size, learning_rate, log_path):
@@ -53,7 +70,7 @@ def runtraining(epoch_num, mini_batch_size, test_batch_size, learning_rate, log_
         computed_training_loss = 0
         computed_val_loss = 0
         #adjust learning rate
-        #adjustlearningrate(optimizer, learning_rate, epoch)
+        adjustlearningratecontrol(optimizer, epoch)
 
         #training
         for index, data in enumerate(trainloader):
