@@ -18,15 +18,17 @@ import cifarclassifier
 
 parser = argparse.ArgumentParser(description='Process training arguments')
 parser.add_argument('-e', '--epoch', default=300, type=int)
-parser.add_argument('-mb', '--mini_batch_size', default=10, type=int)
+parser.add_argument('-mb', '--mini_batch_size', default=128, type=int)
 parser.add_argument('-tb', '--test_batch_size', default=4, type=int)
 parser.add_argument('-lr', '--learning_rate', default=0.01, type=float)
 parser.add_argument('-al', '--adjust_lr', default=0, type=int)
 parser.add_argument('-ap', '--adjust_period', default=10, type=int)
 parser.add_argument('-ar', '--adjust_rate', default=0.1, type=float)
 
-parser.add_argument('-logdir', '--log_dir', default='/media/maxiaoyu/datastore/Log/')
+parser.add_argument('-logdir', '--log_dir', default='/media/maxiaoyu/data/Log/')
 parser.add_argument('-log', '--log_file_name', default='running.log')
+
+parser.add_argument('-d', '--data_path', default='/media/maxiaoyu/data/training_data')
 
 
 def adjustlearningrate1(op, blr, rate, epoch, p):
@@ -48,7 +50,7 @@ def adjustlearningrate2(op, epoch):
 
 
 def adjustlearningratecontrol(op, epoch):
-    global args
+
     if args.adjust_lr == 0:
         pass
     elif args.adjust_lr == 1:
@@ -59,8 +61,8 @@ def adjustlearningratecontrol(op, epoch):
 
 def testdata():
     transform = getTransform()
-    trainset = torchvision.datasets.CIFAR10(root='/media/maxiaoyu/datastore/training_data',
-                                            train=True, download=True, transform=transform)
+    trainset = torchvision.datasets.CIFAR10(root=args.data_path,
+                                            train=True, download=False, transform=transform)
 
     trainloader = torch.utils.data.DataLoader(trainset, batch_size=1,
                                               shuffle=True, num_workers=2)
@@ -75,18 +77,19 @@ def testdata():
 
 
 def runtraining(net, epoch_num, mini_batch_size, test_batch_size, learning_rate, log_path):
+
     transform = getTransformV1()
-    trainset = torchvision.datasets.CIFAR10(root='/media/maxiaoyu/datastore/training_data',
-                                            train=True, download=True, transform=transform)
+    trainset = torchvision.datasets.CIFAR10(root=args.data_path,
+                                            train=True, download=False, transform=transform)
     trainloader = torch.utils.data.DataLoader(trainset, batch_size=mini_batch_size,
                                               shuffle=True, num_workers=2)
-    testset = torchvision.datasets.CIFAR10(root='/media/maxiaoyu/datastore/training_data', train=False,
-                                           download=True, transform=transform)
+    testset = torchvision.datasets.CIFAR10(root=args.data_path, train=False,
+                                           download=False, transform=transform)
     testloader = torch.utils.data.DataLoader(testset, batch_size=test_batch_size,
                                              shuffle=False, num_workers=2)
 
     #net = Cifar10ClassifierV1()
-    net.cuda()
+    #net.cuda()
 
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.SGD(net.parameters(), lr=learning_rate, momentum=0.9)
@@ -159,7 +162,6 @@ def runtraining(net, epoch_num, mini_batch_size, test_batch_size, learning_rate,
 
 
 
-
 def main():
     global args
     args = parser.parse_args()
@@ -167,6 +169,8 @@ def main():
     #testdata()
     model = cifarclassifier.__dict__['vgg11']()
     #print(model)
+    #model.features = torch.nn.DataParallel(model.features)
+    model.cuda()
 
     runtraining(model, args.epoch, args.mini_batch_size, args.test_batch_size, args.learning_rate, args.log_dir + args.log_file_name)
 
