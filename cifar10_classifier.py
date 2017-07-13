@@ -7,11 +7,13 @@ from torch.autograd import Variable
 import torch.nn as nn
 import torch.optim as optim
 
-from datautils import getTransform
+from datautils import getTransform, getTransformV1
 from torch.utils.data.sampler import RandomSampler, SubsetRandomSampler
 from logoperator import SaveLog
 
 from cifarclassifier import Cifar10Classifier, Cifar10ClassifierV1
+
+import cifarclassifier
 
 
 parser = argparse.ArgumentParser(description='Process training arguments')
@@ -33,8 +35,16 @@ def adjustlearningrate1(op, blr, rate, epoch, p):
     for param_group in op.param_groups:
         param_group['lr'] = lr
 
-def adjustlearningrate2():
-    pass
+def adjustlearningrate2(op, epoch):
+    if epoch >=150:
+        lr = 0.01
+        if epoch >= 150 and epoch < 250:
+            lr = 0.01
+        elif epoch >= 250:
+            lr = 0.001
+        for param_group in op.param_groups:
+            param_group['lr'] = lr
+
 
 
 def adjustlearningratecontrol(op, epoch):
@@ -44,11 +54,28 @@ def adjustlearningratecontrol(op, epoch):
     elif args.adjust_lr == 1:
         adjustlearningrate1(op, args.learning_rate, args.adjust_rate, epoch, args.adjust_period)
 
+    elif args.adjust_lr == 2:
+        adjustlearningrate2(op, epoch)
 
-
-
-def runtraining(epoch_num, mini_batch_size, test_batch_size, learning_rate, log_path):
+def testdata():
     transform = getTransform()
+    trainset = torchvision.datasets.CIFAR10(root='/media/maxiaoyu/datastore/training_data',
+                                            train=True, download=True, transform=transform)
+
+    trainloader = torch.utils.data.DataLoader(trainset, batch_size=1,
+                                              shuffle=True, num_workers=2)
+
+    for index, data in enumerate(trainloader):
+        inputs, targets = data
+        print(inputs)
+        print(targets)
+        break
+
+
+
+
+def runtraining(net, epoch_num, mini_batch_size, test_batch_size, learning_rate, log_path):
+    transform = getTransformV1()
     trainset = torchvision.datasets.CIFAR10(root='/media/maxiaoyu/datastore/training_data',
                                             train=True, download=True, transform=transform)
     trainloader = torch.utils.data.DataLoader(trainset, batch_size=mini_batch_size,
@@ -58,7 +85,7 @@ def runtraining(epoch_num, mini_batch_size, test_batch_size, learning_rate, log_
     testloader = torch.utils.data.DataLoader(testset, batch_size=test_batch_size,
                                              shuffle=False, num_workers=2)
 
-    net = Cifar10ClassifierV1()
+    #net = Cifar10ClassifierV1()
     net.cuda()
 
     criterion = nn.CrossEntropyLoss()
@@ -137,8 +164,13 @@ def main():
     global args
     args = parser.parse_args()
     #print(args.log_dir + args.log_file_name)
+    #testdata()
+    model = cifarclassifier.__dict__['vgg11']()
+    #print(model)
 
-    runtraining(args.epoch, args.mini_batch_size, args.test_batch_size, args.learning_rate, args.log_dir + args.log_file_name)
+    runtraining(model, args.epoch, args.mini_batch_size, args.test_batch_size, args.learning_rate, args.log_dir + args.log_file_name)
+
+
 
 
 if __name__ == '__main__':
