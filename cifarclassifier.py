@@ -55,20 +55,20 @@ cfg = {
 }
 
 
-def make_layers(cfg):
+def make_layers(cfg, batch_norm=False):
     print(cfg)
     layers = []
     in_channels = 3
     for v in cfg:
         if v is 'M':
-            print('a max pool')
             layers += [nn.MaxPool2d(kernel_size=2, stride=2)]
         else:
-            print('conv2d in = ', in_channels, '  out = ', v)
             conv2d = nn.Conv2d(in_channels, v, kernel_size=3, padding=1)
-            layers += [conv2d, nn.ReLU(inplace=True)]
+            if batch_norm:
+                layers += [conv2d, nn.BatchNorm2d(v), nn.ReLU(inplace=True)]
+            else:
+                layers += [conv2d, nn.ReLU(inplace=True)]
             in_channels = v
-
     return nn.Sequential(*layers)
 
 class CNNModel(nn.Module):
@@ -93,20 +93,14 @@ class CNNModel(nn.Module):
 
     def forward(self, x):
         x = self.features(x)
-        #print(' parameter = ', x.size())
+        #print(' parameter1 = ', x.size())
         x = x.view(x.size(0), -1)
-        #print(' parameter = ', x.size())
+        #print(' parameter2 = ', x.size())
         x = self.classifier(x)
         return x
 
 
 def vgg11():
-    net = CNNModel(make_layers(cfg['A']))
-    return net
-
-def vggtest():
-    return 'asdf'
-
-
+    return CNNModel(make_layers(cfg['A']))
 
 
