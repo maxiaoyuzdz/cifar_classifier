@@ -27,7 +27,7 @@ parser.add_argument('-tb', '--test_batch_size', default=128, type=int)
 parser.add_argument('-lr', '--learning_rate', default=0.05, type=float)
 parser.add_argument('-mu', '--momentum', default=0.9, type=float)
 
-parser.add_argument('-al', '--adjust_lr', default=0, type=int)
+parser.add_argument('-al', '--adjust_lr', default=1, type=int)
 parser.add_argument('-ap', '--adjust_period', default=30, type=int)
 parser.add_argument('-ar', '--adjust_rate', default=0.5, type=float)
 
@@ -39,6 +39,8 @@ parser.add_argument('-log', '--log_file_name', default='running.log')
 parser.add_argument('-d', '--data_path', default='/media/maxiaoyu/data/training_data')
 parser.add_argument('-pf', '--print_freq', default=128, type=int)
 
+
+best_prec1 = 0
 
 
 def accuracy(output, target, topk=(1,)):
@@ -90,9 +92,6 @@ def adjustLearningRateControl(op, epoch):
 
 
 def runTraining():
-
-
-
     #training set
     training_transforms = getTransformsForTraining()
     training_set = torchvision.datasets.CIFAR10(root=args.data_path,
@@ -114,13 +113,13 @@ def runTraining():
 
 
     # prepare model
-    model = cifarclassifier.__dict__['vgg11']()
+    net = cifarclassifier.__dict__['vgg11']()
     # model.features = torch.nn.DataParallel(model.features)
-    model.cuda()
+    net.cuda()
     cudnn.benchmark = True
 
     criterion = nn.CrossEntropyLoss().cuda()
-    optimizer = optim.SGD(model.parameters(), lr=args.learning_rate, momentum=args.momentum)
+    optimizer = optim.SGD(net.parameters(), lr=args.learning_rate, momentum=args.momentum)
 
     for epoch in range(args.epoch):
         running_loss = 0.0
@@ -132,12 +131,12 @@ def runTraining():
         adjustLearningRateControl(optimizer, epoch)
 
         #training
-        train(training_set_loader, net, )
+        train(training_set_loader, net, criterion, optimizer, epoch)
+
+        # evaluate on validation set
+        prec1 = validate(val_set_loader, net, criterion)
 
 
-
-        # print epoch loss
-        print('training loss = %.16f, validation loss = %0.16f' % (computed_training_loss, computed_val_loss))
 
 
         # epoch test
@@ -169,7 +168,6 @@ def train(training_set_loader, model, criterion, optimizer, epoch):
     losses = AverageMeter()
     top1 = AverageMeter()
 
-
     model.train()
     end = time.time()
 
@@ -182,7 +180,6 @@ def train(training_set_loader, model, criterion, optimizer, epoch):
         loss = criterion(output, target_var)
         loss.backward()
         optimizer.step()
-
 
         #transfer Variable to float Varibale
         output_value = output.float()
@@ -210,6 +207,44 @@ def train(training_set_loader, model, criterion, optimizer, epoch):
 
 
 
+def validate(val_loader, model, criterion):
+    batch_time = AverageMeter()
+    losses = AverageMeter()
+    top1 = AverageMeter()
+
+    model.eval()
+
+    end = time.time()
+
+    for i, (input, target) in enumerate(val_loader):
+
+        input_var, target_var = Variable(input.cuda()), Variable(target.cuda())
+
+        output = model(input_var)
+        loss = criterion(output, target_var)
+
+        output_value = output.float()
+        loss_value = loss.float()
+
+        prec1 = accuracy(output_value, target)[0]
+        losses.update(loss_value.data[0], input.size(0))
+        top1.update(prec1[0], input.size(0))
+
+        batch_time.update(time.time() - end)
+        end = time.time()
+
+        if i % args.print_freq == 0:
+            print('Test: [{0}/{1}]\t'
+                  'Time {batch_time.val:.3f} ({batch_time.avg:.3f})\t'
+                  'Loss {loss.val:.4f} ({loss.avg:.4f})\t'
+                  'Prec@1 {top1.val:.3f} ({top1.avg:.3f})'.format(
+                  i, len(val_loader), batch_time=batch_time,
+                  loss=losses, top1=top1))
+
+    print(' * Prec@1 {top1.avg: .3f}'
+          .format(top1=top1))
+
+    return top1.avg
 
 
 
@@ -218,8 +253,7 @@ def train(training_set_loader, model, criterion, optimizer, epoch):
 def main():
     global args
     args = parser.parse_args()
-    #print(args.log_dir + args.log_file_name)
-    #testdata()
+
     runTraining()
 
 
