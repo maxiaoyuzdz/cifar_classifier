@@ -9,8 +9,8 @@ from logoperator import ReadLossLogByLineNum, ReadAllLossLog
 parser = argparse.ArgumentParser(description='Process training arguments')
 parser.add_argument('-t', '--work_type', default='s')
 parser.add_argument('-e', '--epoch_num', default=300, type=int)
-parser.add_argument('-lm', '--loss_max', default=2, type=int)
-parser.add_argument('-logdir', '--log_dir', default='/media/maxiaoyu/datastore/Log/')
+parser.add_argument('-lm', '--loss_max', default=2.0, type=float)
+parser.add_argument('-logdir', '--log_dir', default='/media/maxiaoyu/data/Log/')
 parser.add_argument('-log', '--log_file_name', default='running.log')
 
 epoch_data = []

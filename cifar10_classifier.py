@@ -37,6 +37,7 @@ parser.add_argument('-logdir', '--log_dir', default='/media/maxiaoyu/data/Log/')
 parser.add_argument('-log', '--log_file_name', default='running.log')
 
 parser.add_argument('-d', '--data_path', default='/media/maxiaoyu/data/training_data')
+parser.add_argument('-pa', '--print_allow', default=False, type=bool)
 parser.add_argument('-pf', '--print_freq', default=128, type=int)
 
 
@@ -44,28 +45,17 @@ best_prec1 = 0
 
 
 def accuracy(output, target, topk=(1,)):
+    """use cuda tensor, parameters output and target are cuda tensor"""
     maxk = max(topk)
     batch_size = target.size(0)
 
     _, pred = output.topk(maxk, 1, True, True)
     pred = pred.t()
-    c1 = target.view(1, -1).expand_as(pred).long()
-    if torch.is_tensor(c1):
-        print('ok')
-
-    correct = torch.eq(c1, pred)
-
-    print('correct', correct)
+    correct = pred.eq(target.view(1, -1).expand_as(pred).long())
 
     res = []
     correct_k = correct.sum()
-    res.append(correct_k.mul_(100.0 / batch_size))
-
-#    for k in topk:
-#        correct_k = correct[:k].view(-1).float().sum()
-#        res.append( correct_k.mul_(100.0 / batch_size) )
-
-
+    res.append(correct_k * 100.0 / batch_size)
 
     return res
 
@@ -103,6 +93,7 @@ def adjustLearningRateControl(op, epoch):
 
 
 def runTraining():
+    global best_prec1
     #training set
     training_transforms = getTransformsForTraining()
     training_set = torchvision.datasets.CIFAR10(root=args.data_path,
@@ -122,7 +113,6 @@ def runTraining():
     testloader = torch.utils.data.DataLoader(testset, batch_size=args.test_batch_size,
                                              shuffle=False, num_workers=args.loader_worker)
 
-
     # prepare model
     net = cifarclassifier.__dict__['vgg11']()
     # model.features = torch.nn.DataParallel(model.features)
@@ -133,34 +123,30 @@ def runTraining():
     optimizer = optim.SGD(net.parameters(), lr=args.learning_rate, momentum=args.momentum)
 
     for epoch in range(args.epoch):
-        running_loss = 0.0
-        val_loss = 0.0
-        computed_training_loss = 0
-        computed_val_loss = 0
-
         #adjust learning rate
         adjustLearningRateControl(optimizer, epoch)
 
         #training
-        train(training_set_loader, net, criterion, optimizer, epoch)
+        training_loss, training_accuracy = train(training_set_loader, net, criterion, optimizer, epoch)
 
         # evaluate on validation set
-        prec1 = validate(val_set_loader, net, criterion)
+        val_loss, val_accuracy = validate(val_set_loader, net, criterion)
 
-        is_best = prec1 > best_prec1
-        best_prec1 = max(prec1, best_prec1)
+        is_best = val_accuracy > best_prec1
+        best_prec1 = max(val_accuracy, best_prec1)
 
         #save log
-        #SaveLog(epoch + 1, 5000, computed_training_loss, computed_val_loss, test_accurate,
-         #       args.log_dir + args.log_file_name )
+        SaveLog(epoch + 1, 5000, training_loss, val_loss, val_accuracy,
+                args.log_dir + args.log_file_name )
         print('save log end')
 
 
 def train(training_set_loader, model, criterion, optimizer, epoch):
+    """train a epoch, return average loss and accuracy"""
     batch_time = AverageMeter()
     data_time = AverageMeter()
     losses = AverageMeter()
-    top1 = AverageMeter()
+    accuracies = AverageMeter()
 
     model.train()
     end = time.time()
@@ -177,75 +163,71 @@ def train(training_set_loader, model, criterion, optimizer, epoch):
 
         #transfer Variable to float Varibale
         output_cuda_var_float = output_cuda_var.float()
-        loss_value = loss.float()
+        loss = loss.float()
 
         #measure accuracy use Variable's Tensor
         prec1 = accuracy(output_cuda_var_float.data, target_cuda_var.data)[0]
-        print('accuracy = ', prec1)
-        losses.update(loss_value[0], input.size(0))
-        top1.update(prec1[0], input.size(0))
+        losses.update(loss.data[0], input.size(0))
+        accuracies.update(prec1, input.size(0))
 
         #measure elapsed time
         batch_time.update(time.time() - end)
         end = time.time()
 
-        if i % args.print_freq == 0:
+        if args.print_allow and i % args.print_freq == 0 :
             print('Epoch: [{0}][{1}/{2}]\t'
                   'Time {batch_time.val:.3f} ({batch_time.avg:.3f})\t'
                   'Data {data_time.val:.3f} ({data_time.avg:.3f})\t'
                   'Loss {loss.val:.4f} ({loss.avg:.4f})\t'
                   'Prec@1 {top1.val:.3f} ({top1.avg:.3f})'.format(
                   epoch, i, len(training_set_loader), batch_time=batch_time,
-                  data_time=data_time, loss=losses, top1=top1))
+                  data_time=data_time, loss=losses, top1=accuracies))
 
     #return average loss and accuracy
+    return losses.avg, accuracies.avg
 
 
 
-
-
-
-
-
-def validate(val_loader, model, criterion):
+def validate(val_set_loader, model, criterion):
     batch_time = AverageMeter()
     losses = AverageMeter()
-    top1 = AverageMeter()
+    accuracies = AverageMeter()
 
     model.eval()
-
     end = time.time()
 
-    for i, (input, target) in enumerate(val_loader):
+    for i, (input, target) in enumerate(val_set_loader):
+        input_cuda_var, target_cuda_var = Variable(input.cuda()), Variable(target.cuda())
 
-        input_var, target_var = Variable(input.cuda()), Variable(target.cuda())
+        output_cuda_var = model(input_cuda_var)
+        loss = criterion(output_cuda_var, target_cuda_var)
 
-        output = model(input_var)
-        loss = criterion(output, target_var)
+        #transfer Variable to float Variable
+        output_cuda_var_float = output_cuda_var.float()
+        loss = loss.float()
 
-        output_value = output.float()
-        loss_value = loss.float()
+        #measure accuracy
+        prec1 = accuracy(output_cuda_var_float.data, target_cuda_var.data)[0]
+        losses.update(loss.data[0], input.size(0))
+        accuracies.update(prec1, input.size(0))
 
-        prec1 = accuracy(output_value, target)[0]
-        losses.update(loss_value.data[0], input.size(0))
-        top1.update(prec1[0], input.size(0))
-
+        #measure elapsed time
         batch_time.update(time.time() - end)
         end = time.time()
 
-        if i % args.print_freq == 0:
+        if args.print_allow and i % args.print_freq == 0:
             print('Test: [{0}/{1}]\t'
                   'Time {batch_time.val:.3f} ({batch_time.avg:.3f})\t'
                   'Loss {loss.val:.4f} ({loss.avg:.4f})\t'
                   'Prec@1 {top1.val:.3f} ({top1.avg:.3f})'.format(
-                  i, len(val_loader), batch_time=batch_time,
-                  loss=losses, top1=top1))
+                  i, len(val_set_loader), batch_time=batch_time,
+                  loss=losses, top1=accuracies))
 
     print(' * Prec@1 {top1.avg: .3f}'
-          .format(top1=top1))
+          .format(top1=accuracies))
 
     #return average loss and accuracy
-    return top1.avg
+    return losses.avg, accuracies.avg
 
 
 
