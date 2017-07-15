@@ -49,12 +49,23 @@ def accuracy(output, target, topk=(1,)):
 
     _, pred = output.topk(maxk, 1, True, True)
     pred = pred.t()
-    correct = pred.eq(target.view(1, -1).expand_as(pred))
+    c1 = target.view(1, -1).expand_as(pred).long()
+    if torch.is_tensor(c1):
+        print('ok')
+
+    correct = torch.eq(c1, pred)
+
+    print('correct', correct)
 
     res = []
-    for k in topk:
-        correct_k = correct[:k].view(-1).float().sum()
-        res.append( correct_k.mul_(100.0 / batch_size) )
+    correct_k = correct.sum()
+    res.append(correct_k.mul_(100.0 / batch_size))
+
+#    for k in topk:
+#        correct_k = correct[:k].view(-1).float().sum()
+#        res.append( correct_k.mul_(100.0 / batch_size) )
+
+
 
     return res
 
@@ -136,29 +147,12 @@ def runTraining():
         # evaluate on validation set
         prec1 = validate(val_set_loader, net, criterion)
 
-
-
-
-        # epoch test
-        correct = 0
-        total = 0
-
-        for data in testloader:
-            images, labels = data
-            outputs = net(Variable(images.cuda()))
-            _, predicted = torch.max(outputs.data, 1)
-            total += labels.size(0)
-
-            for j in range(args.test_batch_size):
-                if labels[j] == predicted[j][0]:
-                    correct += 1
-        test_accurate = 100 * correct / total
-        print('Accuracy of the network on the 10000 test images: %d %%' % (
-            100 * correct / total))
+        is_best = prec1 > best_prec1
+        best_prec1 = max(prec1, best_prec1)
 
         #save log
-        SaveLog(epoch + 1, 5000, computed_training_loss, computed_val_loss, test_accurate,
-                args.log_dir + args.log_file_name )
+        #SaveLog(epoch + 1, 5000, computed_training_loss, computed_val_loss, test_accurate,
+         #       args.log_dir + args.log_file_name )
         print('save log end')
 
 
@@ -174,19 +168,20 @@ def train(training_set_loader, model, criterion, optimizer, epoch):
     for i, (input, target) in enumerate(training_set_loader):
         data_time.update(time.time() - end)
 
-        input_var, target_var = Variable(input.cuda()), Variable(target.cuda())
+        input_cuda_var, target_cuda_var = Variable(input.cuda()), Variable(target.cuda())
         optimizer.zero_grad()
-        output = model(input_var)
-        loss = criterion(output, target_var)
+        output_cuda_var = model(input_cuda_var)
+        loss = criterion(output_cuda_var, target_cuda_var)
         loss.backward()
         optimizer.step()
 
         #transfer Variable to float Varibale
-        output_value = output.float()
+        output_cuda_var_float = output_cuda_var.float()
         loss_value = loss.float()
 
-        #measure accuracy
-        prec1 = accuracy(output_value.data, target)[0]
+        #measure accuracy use Variable's Tensor
+        prec1 = accuracy(output_cuda_var_float.data, target_cuda_var.data)[0]
+        print('accuracy = ', prec1)
         losses.update(loss_value[0], input.size(0))
         top1.update(prec1[0], input.size(0))
 
@@ -202,6 +197,11 @@ def train(training_set_loader, model, criterion, optimizer, epoch):
                   'Prec@1 {top1.val:.3f} ({top1.avg:.3f})'.format(
                   epoch, i, len(training_set_loader), batch_time=batch_time,
                   data_time=data_time, loss=losses, top1=top1))
+
+    #return average loss and accuracy
+
+
+
 
 
 
@@ -244,6 +244,7 @@ def validate(val_loader, model, criterion):
     print(' * Prec@1 {top1.avg: .3f}'
           .format(top1=top1))
 
+    #return average loss and accuracy
     return top1.avg
 
 
