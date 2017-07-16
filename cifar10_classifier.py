@@ -1,6 +1,7 @@
 import sys
 import time
 import argparse
+import shutil
 import torch
 import torchvision
 
@@ -27,6 +28,9 @@ parser.add_argument('-tb', '--test_batch_size', default=128, type=int)
 parser.add_argument('-lr', '--learning_rate', default=0.05, type=float)
 parser.add_argument('-mu', '--momentum', default=0.9, type=float)
 
+parser.add_argument('-wda', '--weight_decay_allow', default=False, type=bool)
+parser.add_argument('-wd', '--weight_decay', default=5e-4, type=float)
+
 parser.add_argument('-al', '--adjust_lr', default=1, type=int)
 parser.add_argument('-ap', '--adjust_period', default=30, type=int)
 parser.add_argument('-ar', '--adjust_rate', default=0.5, type=float)
@@ -37,11 +41,18 @@ parser.add_argument('-logdir', '--log_dir', default='/media/maxiaoyu/data/Log/')
 parser.add_argument('-log', '--log_file_name', default='running.log')
 
 parser.add_argument('-d', '--data_path', default='/media/maxiaoyu/data/training_data')
+
 parser.add_argument('-pa', '--print_allow', default=False, type=bool)
 parser.add_argument('-pf', '--print_freq', default=128, type=int)
 
+parser.add_argument('-sp','--save_model_path', default='/media/maxiaoyu/checkpoint')
 
 best_prec1 = 0
+
+
+def saveCheckPoint(state, is_best, filename='_checkpiint'):
+
+
 
 
 def accuracy(output, target, topk=(1,)):
@@ -120,7 +131,12 @@ def runTraining():
     cudnn.benchmark = True
 
     criterion = nn.CrossEntropyLoss().cuda()
-    optimizer = optim.SGD(net.parameters(), lr=args.learning_rate, momentum=args.momentum)
+
+    if args.weight_decay_allow:
+        optimizer = optim.SGD(net.parameters(), lr=args.learning_rate, momentum=args.momentum,
+                              weight_decay=args.weight_decay)
+    else:
+        optimizer = optim.SGD(net.parameters(), lr=args.learning_rate, momentum=args.momentum)
 
     for epoch in range(args.epoch):
         #adjust learning rate
