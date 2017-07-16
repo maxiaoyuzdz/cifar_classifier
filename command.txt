@@ -1,0 +1,3 @@
+python cifar10_classifier.py -a vgg11 -r False -e 400 -wda True -log q4.log -sf q4_checkpoint.pth.tar
+
+python trainingvallosmonitor.py -e 400 -log q4.log -t s
