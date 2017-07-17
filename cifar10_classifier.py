@@ -3,6 +3,7 @@ import os
 import time
 import argparse
 import shutil
+import numpy as np
 import torch
 import torchvision
 
@@ -62,6 +63,8 @@ parser.add_argument('-sbf', '--save_best_model_file', default='_best_checkpoint.
 
 
 best_prec1 = 0
+training_loss_array = []
+validation_loss_array = []
 
 
 def saveCheckPoint(state, is_best):
@@ -116,6 +119,7 @@ def adjustLearningRateControl(op, epoch):
 
 def runTraining():
     global best_prec1
+    start_time = time.time()
     # prepare model, select from args
     net = cifarclassifier.__dict__[args.arch]()
     # model.features = torch.nn.DataParallel(model.features)
@@ -169,7 +173,7 @@ def runTraining():
         best_prec1 = max(val_accuracy, best_prec1)
 
         # save log
-        SaveLog(epoch + 1, 5000, training_loss, val_loss, val_accuracy,
+        SaveLog(epoch + 1, 5000, training_loss, val_loss, training_accuracy, val_accuracy,
                 args.log_dir + args.log_file_name)
         #save running model
         saveCheckPoint({
@@ -179,9 +183,11 @@ def runTraining():
             'best_prec1': best_prec1,
             'optimizer': optimizer.state_dict(),
         }, is_best)
-
-
         print('save log end')
+
+    end_time = time.time()
+    running_time = end_time - start_time
+    print('running time = ', running_time / 60, ' mins')
 
 
 def train(training_set_loader, model, criterion, optimizer, epoch):

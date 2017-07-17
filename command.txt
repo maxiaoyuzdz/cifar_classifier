@@ -1,3 +1,5 @@
-python cifar10_classifier.py -a vgg11 -r False -e 400 -wda True -log q4.log -sf q4_checkpoint.pth.tar
+python cifar10_classifier.py -a vgg11 -r False -e 400 -wda True -log q5.log -sf q5_checkpoint.pth.tar
+
+python cifar10_classifier.py -a vgg11_bn -r False -e 400 -wda True -log q6.log -sf q6_checkpoint.pth.tar
 
 python trainingvallosmonitor.py -e 400 -log q4.log -t s

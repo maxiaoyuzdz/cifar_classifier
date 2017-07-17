@@ -17,7 +17,7 @@ epoch_data = []
 training_loss_data = []
 validation_loss_data = []
 m_data = []
-test_accurate_data = []
+validation_accuracy_data = []
 
 log_line_num = 0
 
@@ -46,7 +46,8 @@ def updatedata(log_file_name):
 
     while True:
         time.sleep(1)
-        epoch, m, training_loss, validation_loss, test_accurate = ReadLossLogByLineNum(log_line_num, log_file_name)
+        epoch, m, training_loss, validation_loss, training_accuracy, validation_accuracy = \
+            ReadLossLogByLineNum(log_line_num, log_file_name)
         if epoch == -1:
             pass
         else:
@@ -65,11 +66,6 @@ def updatedata(log_file_name):
             validation_line.set_ydata(validation_loss_data)
             plt.draw()
             plt.pause(1)
-
-
-
-
-
 
 
 def showgraphicdynamically(file_name):
@@ -106,12 +102,12 @@ def updatestaticdata():
     global training_loss_data
     global validation_loss_data
     global m_data
-    global test_accurate_data
+    global validation_accuracy_data
 
 
     while True:
         time.sleep(0.05)
-        #print('drawing...')
+
         training_line.set_xdata(epoch_data)
         training_line.set_ydata(training_loss_data)
         validation_line.set_xdata(epoch_data)
@@ -135,9 +131,9 @@ def showgraphicstaically(file_name):
         global training_loss_data
         global validation_loss_data
         global m_data
-        global test_accurate_data
+        global validation_accuracy_data
 
-        epoch_data, m_data, training_loss_data, validation_loss_data, test_accurate_data = ReadAllLossLog(file_name)
+        epoch_data, m_data, training_loss_data, validation_loss_data, training_accuracy_data, validation_accuracy_data = ReadAllLossLog(file_name)
 
 
         # draw graphic
