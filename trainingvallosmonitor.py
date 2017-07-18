@@ -36,15 +36,9 @@ validation_accuracy_line = ''
 
 # for compare
 compare_epoch_data = []
-
-#compare_training_loss_lines = []
 compare_training_loss_data = []
-#compare_validation_loss_lines = []
 compare_validation_loss_data = []
-
-#compare_training_accuracy_lines = []
 compare_training_accuracy_data = []
-#compare_validation_accuracy_lines = []
 compare_validation_accuracy_data = []
 
 
@@ -270,7 +264,6 @@ def drawCompareGraphic():
     max_t_loss = 0
     for t_loss_data in compare_training_loss_data:
         t_loss_line, = plt.plot([])
-        #compare_training_loss_lines.append(t_loss_line)
         t_loss_line.set_xdata(max_epoch_data)
         t_loss_line.set_ydata(t_loss_data)
         c_loss = max(t_loss_data)
@@ -281,7 +274,6 @@ def drawCompareGraphic():
     max_v_loss = 0
     for v_loss_data in compare_validation_loss_data:
         v_loss_line, = plt.plot([])
-        #compare_validation_loss_lines.append(v_loss_line)
         v_loss_line.set_xdata(max_epoch_data)
         v_loss_line.set_ydata(v_loss_data)
         v_loss = max(v_loss_data)
@@ -313,7 +305,6 @@ def drawCompareGraphic():
 
     for t_accuracy_data in compare_training_accuracy_data:
         t_accuracy_line, = plt.plot([])
-        #compare_training_accuracy_lines.append(t_accuracy_line)
         t_accuracy_line.set_xdata(max_epoch_data)
         t_accuracy_line.set_ydata(t_accuracy_data)
 
