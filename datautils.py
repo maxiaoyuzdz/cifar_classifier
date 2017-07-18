@@ -34,3 +34,6 @@ def str2bool(v):
         return False
     else:
         raise argparse.ArgumentTypeError('Boolean value expected.')
+
+def str2array(s):
+    return s.split(',')
