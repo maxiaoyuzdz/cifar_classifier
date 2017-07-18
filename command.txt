@@ -7,3 +7,7 @@ python cifar10_classifier.py -a vgg11_bn2 -r False -e 400 -wda True -log q7.log 
 python trainingvallosmonitor.py -e 400 -log q4.log -t s
 
 python trainingvallosmonitor.py -e 400 -log q6.log -t d -f 0.05
+
+python cifar10_classifier.py -a vgg16 -r False -e 400 -wda True -log q7.log -sf q7_checkpoint.pth.tar
+
+python cifar10_classifier.py -a vgg16_bn -r False -e 400 -wda True -log q8.log -sf q8_checkpoint.pth.tar

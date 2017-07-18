@@ -5,7 +5,8 @@ import math
 # dymatic creating model
 
 cfg = {
-    'A': [64, 'M', 128, 'M', 256, 256, 'M', 512, 512, 'M', 512, 512, 'M']
+    'A': [64, 'M', 128, 'M', 256, 256, 'M', 512, 512, 'M', 512, 512, 'M'],
+    'D': [64, 64, 'M', 128, 128, 'M', 256, 256, 256, 'M', 512, 512, 512, 'M', 512, 512, 512, 'M'],
 }
 
 
@@ -61,5 +62,11 @@ def vgg11():
 
 def vgg11_bn():
     return CNNModel(make_layers(cfg['A'], batch_norm=True))
+
+def vgg16():
+    return CNNModel(make_layers(cfg['D']))
+
+def vgg16_bn():
+    return CNNModel(make_layers(cfg['D'], batch_norm=True))
 
 
