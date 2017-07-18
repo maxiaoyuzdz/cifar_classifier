@@ -140,7 +140,8 @@ def runTraining():
             checkpoint = torch.load(args.resume_path + args.resume_file)
             args.start_epoch = checkpoint['epoch']
             best_prec1 = checkpoint['best_prec1']
-            net.load_state_dict(checkpoint['optimizer'])
+            net.load_state_dict(checkpoint['state_dict'])
+            optimizer.load_state_dict(checkpoint['optimizer'])
             print("=> loaded checkpoint '{}".format(checkpoint['epoch']))
         else:
             print('=> no checkpoint found ')
@@ -154,8 +155,8 @@ def runTraining():
 
     # validation set
     validation_transforms = getTransformsForValidation()
-    val_set = torchvision.datasets.CIFAR10(root=args.data_path, train=False, download=False,
-                                           transform=validation_transforms)
+    val_set = torchvision.datasets.CIFAR10(root=args.data_path,
+                                           train=False, download=False, transform=validation_transforms)
     val_set_loader = torch.utils.data.DataLoader(val_set, batch_size=args.mini_batch_size,
                                                  shuffle=False, num_workers=args.loader_worker)
 
