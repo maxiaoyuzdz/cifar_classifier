@@ -53,11 +53,12 @@ def main():
                                                       shuffle=False, num_workers=4)
 
 
-    inputs, targets = next(iter(data_set_loader))
+    #inputs, targets = next(iter(data_set_loader))
 
-    out = torchvision.utils.make_grid(inputs)
-
-    imshow(out, title=[data_set[x] for x in targets])
+    for i, (input, target) in enumerate(data_set_loader):
+        out = torchvision.utils.make_grid(input)
+        imshow(out, title=[x for x in target])
+        break
 
     print('end')
 
