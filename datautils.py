@@ -24,6 +24,8 @@ def getTransformsForValidation():
                              std=[0.229, 0.224, 0.225])
     ])
 
+
+
 def count(iter):
     return sum(1 for _ in iter)
 
