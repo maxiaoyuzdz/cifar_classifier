@@ -4,6 +4,8 @@ import skimage
 from PIL import Image
 import random
 
+import matplotlib.pyplot as plt
+
 
 def noisy(noise_typ,image):
 
@@ -70,22 +72,33 @@ def main():
     img.show()
 
     data = np.asarray(img)
+    ds = data.shape
     #print('shpe = ', data.shape)
     #noise = data + 100. * np.random.randn(data.shape)
     #noise = np.random.normal(0, 0.1, (data.shape[0], data.shape[1], data.shape[2])) + data
 
-    #data2 = skimage.util.random_noise(data, mode='gaussian', seed=0, clip=True)
+    print(data[1, 1, 1])
+
+    data2 = skimage.util.random_noise(data, mode='salt', amount=0.15)
     #print('shape 2 = ', data2.shape)
     #outimg = Image.fromarray(noise, "RGBA")
+
+
 
     # work 1
     #outimg = sp_noise(data, 0.05)
 
-    outimg = noisy('speckle', data)
 
-    outimg = Image.fromarray(outimg, "RGB")
+
+    print(data2[1, 1, 1])
+
+    outimg = Image.fromarray(data2, "RGB").convert('RGB')
+
 
     outimg.show()
+
+    plt.imshow(data2)
+    plt.show()
 
 
 if __name__ == '__main__':

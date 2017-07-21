@@ -116,7 +116,7 @@ def sp_noise(image, prob):
                 output[i][j] = image[i][j]
     return output
 
-def noiseTransform(img):
+def saltpepperNoiseTransform(img):
     """
     if np.random.randint(0, 2) == 1:
         noise = np.random.randint(0, 50, (img.height, img.width))  # design jitter/noise here
@@ -136,6 +136,11 @@ def noiseTransform(img):
     outimg = sp_noise(data, 0.05)
     outimg = Image.fromarray(outimg)
     return outimg
+
+def noiseTransform(img):
+    data = np.asarray(img)
+    data2 = skimage.util.random_noise(data, mode='salt', amount=0.15)
+    return Image.fromarray(data2, "RGB")#data2
 
 
 
