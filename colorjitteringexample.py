@@ -12,6 +12,11 @@ import matplotlib.pyplot as plt
 from PIL import Image
 
 
+import random
+
+import skimage
+
+
 
 
 
@@ -92,21 +97,54 @@ def rotate180Transform(img):
     return img
 
 
+
+def sp_noise(image, prob):
+    '''
+    Add salt and pepper noise to image
+    prob: Probability of the noise
+    '''
+    output = np.zeros(image.shape, np.uint8)
+    thres = 1 - prob
+    for i in range(image.shape[0]):
+        for j in range(image.shape[1]):
+            rdn = random.random()
+            if rdn < prob:
+                output[i][j] = 0
+            elif rdn > thres:
+                output[i][j] = 255
+            else:
+                output[i][j] = image[i][j]
+    return output
+
 def noiseTransform(img):
+    """
     if np.random.randint(0, 2) == 1:
         noise = np.random.randint(0, 50, (img.height, img.width))  # design jitter/noise here
         zitter = np.zeros_like(img)
         zitter[:, :, 1] = noise
         noise_added = img + zitter
         return noise_added
-    return img
+    """
+    """
+    data = np.asarray(img, dtype="int32")
+    print('shpe = ', data.shape)
+    data = skimage.util.random_noise(data, mode='gaussian', seed=None, clip=True)
+    print('shape 2 = ', data.shape)
+    outimg = Image.fromarray(data, "RGB")
+    """
+    data = np.asarray(img)
+    outimg = sp_noise(data, 0.05)
+    outimg = Image.fromarray(outimg)
+    return outimg
+
+
 
 
 def getTransformsForTest():
     return transforms.Compose([
-        transforms.Lambda(lambda x: verticalFlipTransform(x)),
-        transforms.Lambda(lambda x: rotate90Transform(x)),
-        transforms.Lambda(lambda x: rotate180Transform(x)),
+        #transforms.Lambda(lambda x: verticalFlipTransform(x)),
+        #transforms.Lambda(lambda x: rotate90Transform(x)),
+        #transforms.Lambda(lambda x: rotate180Transform(x)),
         transforms.Lambda(lambda x: noiseTransform(x)),
         transforms.ToTensor(),
         transforms.Normalize(mean=[0.485, 0.456, 0.406],
@@ -120,8 +158,8 @@ def imgtest1():
     transforms = getTransformsForTest()
     data_set = torchvision.datasets.CIFAR10(root='/media/maxiaoyu/data/training_data',
                                             train=False, download=False, transform=transforms)
-    data_set_loader = torch.utils.data.DataLoader(data_set, batch_size=4,
-                                                  shuffle=False, num_workers=4)
+    data_set_loader = torch.utils.data.DataLoader(data_set, batch_size=128,
+                                                  shuffle=False, num_workers=1)
 
     # inputs, targets = next(iter(data_set_loader))
 
