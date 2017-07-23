@@ -86,17 +86,13 @@ def verticalFlipTransform(img):
         img = img.transpose(Image.FLIP_TOP_BOTTOM)
     return img
 
-def rotate90Transform(img):
+def rotateTransform(img):
     if np.random.randint(0, 2) == 1:
-        img = img.rotate(90)
+        if np.random.randint(0, 2) == 1:
+            img = img.rotate(90)
+        else:
+            img = img.rotate(180)
     return img
-
-
-def rotate180Transform(img):
-    if np.random.randint(0, 2) == 1:
-        img = img.rotate(180)
-    return img
-
 
 
 def sp_noise(image, prob):
@@ -139,20 +135,41 @@ def saltpepperNoiseTransform(img):
     return outimg
 
 def noiseTransform(img):
+    noise_type = np.random.randint(0, 5)
+
+    if noise_type == 0:
+        return img
+
     data = np.asarray(img)
-    data2 = skimage.util.random_noise(data, mode='salt', amount=0.15)
-    ci = scipy.misc.toimage(data2, cmin=0.0, cmax=1.0)
-    return ci
+    if noise_type == 1:
+        #pepper s&p salt
+        data2 = skimage.util.random_noise(data, mode='s&p', amount=0.15)
+        ci = scipy.misc.toimage(data2, cmin=0.0, cmax=1.0)
+        return ci
+    elif noise_type == 2:
+        data2 = skimage.util.random_noise(data, mode='gaussian')
+        ci = scipy.misc.toimage(data2, cmin=0.0, cmax=1.0)
+        return ci
+    elif noise_type == 3:
+        data2 = skimage.util.random_noise(data, mode='localvar')
+        ci = scipy.misc.toimage(data2, cmin=0.0, cmax=1.0)
+        return ci
+    elif noise_type == 4:
+        data2 = skimage.util.random_noise(data, mode='poisson')
+        ci = scipy.misc.toimage(data2, cmin=0.0, cmax=1.0)
+        return ci
+
 
 
 
 
 def getTransformsForTest():
     return transforms.Compose([
-        #transforms.Lambda(lambda x: verticalFlipTransform(x)),
-        #transforms.Lambda(lambda x: rotate90Transform(x)),
-        #transforms.Lambda(lambda x: rotate180Transform(x)),
+        transforms.Lambda(lambda x: verticalFlipTransform(x)),
+        transforms.Lambda(lambda x: rotateTransform(x)),
         transforms.Lambda(lambda x: noiseTransform(x)),
+        transforms.RandomHorizontalFlip(),
+        transforms.RandomCrop(32, 4),
         transforms.ToTensor(),
         transforms.Normalize(mean=[0.485, 0.456, 0.406],
                              std=[0.229, 0.224, 0.225])
