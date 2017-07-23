@@ -2,7 +2,13 @@
 import numpy as np
 import skimage
 from PIL import Image
+#from pylab import cm
 import random
+
+from matplotlib import cm, colors
+import scipy.misc
+
+
 
 import matplotlib.pyplot as plt
 
@@ -79,7 +85,12 @@ def main():
 
     print(data[1, 1, 1])
 
+
+
     data2 = skimage.util.random_noise(data, mode='salt', amount=0.15)
+    ds2 = data2.shape
+
+
     #print('shape 2 = ', data2.shape)
     #outimg = Image.fromarray(noise, "RGBA")
 
@@ -90,15 +101,29 @@ def main():
 
 
 
-    print(data2[1, 1, 1])
-
-    outimg = Image.fromarray(data2, "RGB").convert('RGB')
+    #print(data2[1, 1, 1])
 
 
-    outimg.show()
 
-    plt.imshow(data2)
-    plt.show()
+
+
+
+
+    #pixels.astype('uint8'), 'RGB'
+
+    #cout = cm.ScalarMappable(data2, 'RGB')
+
+    ci = scipy.misc.toimage(data2, cmin=0.0, cmax=1.0)
+    ci.show()
+
+    outimg = Image.fromarray(data2, 'RGB')
+
+    #outimg = Image.fromarray(np.uint8(cm.gist_earth(data2)*255))
+    #outimg = Image.fromarray(, mode="RGB")#.convert('RGB')
+    #outimg.show()
+
+    #plt.imshow(data2)
+    #plt.show()
 
 
 if __name__ == '__main__':

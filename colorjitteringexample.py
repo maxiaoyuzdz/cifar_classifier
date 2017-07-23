@@ -15,6 +15,7 @@ from PIL import Image
 import random
 
 import skimage
+import scipy.misc
 
 
 
@@ -140,7 +141,8 @@ def saltpepperNoiseTransform(img):
 def noiseTransform(img):
     data = np.asarray(img)
     data2 = skimage.util.random_noise(data, mode='salt', amount=0.15)
-    return Image.fromarray(data2, "RGB")#data2
+    ci = scipy.misc.toimage(data2, cmin=0.0, cmax=1.0)
+    return ci
 
 
 
