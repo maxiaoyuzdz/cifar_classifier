@@ -13,6 +13,8 @@ import scipy.misc
 import matplotlib.pyplot as plt
 
 
+
+
 def noisy(noise_typ,image):
 
     if noise_typ == "gauss":
