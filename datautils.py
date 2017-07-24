@@ -5,6 +5,7 @@ from PIL import Image
 import random
 import skimage
 import scipy.misc
+from PIL import ImageFilter
 
 
 def verticalFlipTransform(img):
@@ -46,6 +47,20 @@ def noiseTransform(img):
         data2 = skimage.util.random_noise(data, mode='poisson')
         ci = scipy.misc.toimage(data2, cmin=0.0, cmax=1.0)
         return ci
+
+
+def blurTransform(img):
+    if np.random.randint(0, 2) == 1:
+        outimg = img.filter(ImageFilter.BLUR)
+        return outimg
+    return img
+
+def zoomTransform(img):
+    if np.random.randint(0, 2) == 1:
+
+        outimg = img.resize((45, 45))
+        return outimg
+    return img
 
 
 def getTransform():

@@ -16,6 +16,7 @@ import random
 
 import skimage
 import scipy.misc
+from PIL import ImageFilter
 
 
 
@@ -161,15 +162,35 @@ def noiseTransform(img):
 
 
 
+def blurTransform(img):
+    if np.random.randint(0, 2) == 1:
+        outimg = img.filter(ImageFilter.BLUR)
+        return outimg
+    return img
+
+
+def zoomTransform(img):
+    zoom_type = np.random.randint(0, 2)
+    if zoom_type == 0:
+        return img
+    elif zoom_type == 1:
+
+        outimg = img.resize((45, 45))
+        return outimg
+    return img
 
 
 def getTransformsForTest():
     return transforms.Compose([
-        transforms.Lambda(lambda x: verticalFlipTransform(x)),
-        transforms.Lambda(lambda x: rotateTransform(x)),
-        transforms.Lambda(lambda x: noiseTransform(x)),
+        #transforms.Lambda(lambda x: verticalFlipTransform(x)),
+        #transforms.Lambda(lambda x: rotateTransform(x)),
+        #transforms.Lambda(lambda x: noiseTransform(x)),
+
+        transforms.Lambda(lambda x: zoomTransform(x)),
         transforms.RandomHorizontalFlip(),
         transforms.RandomCrop(32, 4),
+        # blur
+        #transforms.Lambda(lambda x: blurTransform(x)),
         transforms.ToTensor(),
         transforms.Normalize(mean=[0.485, 0.456, 0.406],
                              std=[0.229, 0.224, 0.225])
@@ -182,7 +203,7 @@ def imgtest1():
     transforms = getTransformsForTest()
     data_set = torchvision.datasets.CIFAR10(root='/media/maxiaoyu/data/training_data',
                                             train=False, download=False, transform=transforms)
-    data_set_loader = torch.utils.data.DataLoader(data_set, batch_size=128,
+    data_set_loader = torch.utils.data.DataLoader(data_set, batch_size=4,
                                                   shuffle=False, num_workers=1)
 
     # inputs, targets = next(iter(data_set_loader))

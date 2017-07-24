@@ -12,7 +12,7 @@ import scipy.misc
 
 import matplotlib.pyplot as plt
 
-
+from PIL import ImageFilter
 
 
 def noisy(noise_typ,image):
@@ -77,49 +77,30 @@ def sp_noise(image, prob):
 def main():
     img = Image.open('/media/maxiaoyu/data/training_data/images/macaw2.jpg')
     img.load()
-    img.rotate(45)
-    img.show()
+    #img.show()
 
     data = np.asarray(img)
     ds = data.shape
-    #print('shpe = ', data.shape)
-    #noise = data + 100. * np.random.randn(data.shape)
-    #noise = np.random.normal(0, 0.1, (data.shape[0], data.shape[1], data.shape[2])) + data
 
     print(data[1, 1, 1])
 
+    #zoom
+    outimg = img.resize((45, 45))
+    outimg.show()
 
 
-    data2 = skimage.util.random_noise(data, mode='salt', amount=0.15)
-    ds2 = data2.shape
+    #blur
+    #outimg = img.filter(ImageFilter.BLUR)
+    #outimg.show()
 
 
-    #print('shape 2 = ', data2.shape)
-    #outimg = Image.fromarray(noise, "RGBA")
+    #noise
+    #data2 = skimage.util.random_noise(data, mode='salt', amount=0.15)
+    #ds2 = data2.shape
 
+    #ci = scipy.misc.toimage(data2, cmin=0.0, cmax=1.0)
+    #ci.show()
 
-
-    # work 1
-    #outimg = sp_noise(data, 0.05)
-
-
-
-    #print(data2[1, 1, 1])
-
-
-
-
-
-
-
-    #pixels.astype('uint8'), 'RGB'
-
-    #cout = cm.ScalarMappable(data2, 'RGB')
-
-    ci = scipy.misc.toimage(data2, cmin=0.0, cmax=1.0)
-    ci.show()
-
-    outimg = Image.fromarray(data2, 'RGB')
 
     #outimg = Image.fromarray(np.uint8(cm.gist_earth(data2)*255))
     #outimg = Image.fromarray(, mode="RGB")#.convert('RGB')

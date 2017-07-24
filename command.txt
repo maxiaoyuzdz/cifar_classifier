@@ -16,4 +16,4 @@ python cifar10_classifier.py -a vgg16_bn -r False -e 400 -wda True -log q9.log -
 1080ti 106 89%
 
 python cifar10_classifier.py -a vgg16_bn -r False -e 400 -wda True -log q10.log -sf q10_checkpoint.pth.tar
-1060
+1060 92.4%  216min
