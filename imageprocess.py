@@ -75,6 +75,7 @@ def sp_noise(image, prob):
 def main():
     img = Image.open('/media/maxiaoyu/data/training_data/images/macaw2.jpg')
     img.load()
+    img.rotate(45)
     img.show()
 
     data = np.asarray(img)

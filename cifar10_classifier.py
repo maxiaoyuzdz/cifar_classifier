@@ -161,6 +161,8 @@ def runTraining():
                                                  shuffle=False, num_workers=args.loader_worker)
 
     for epoch in range(args.start_epoch, args.epoch):
+        # epoch time
+        epoch_start_time = time.time()
         # adjust learning rate
         adjustLearningRateControl(optimizer, epoch)
 
@@ -185,6 +187,10 @@ def runTraining():
             'optimizer': optimizer.state_dict(),
         }, is_best)
         print('save log end')
+        epoch_end_time = time.time()
+        epoch_running_time = (epoch_end_time - epoch_start_time) / 60
+        left_time = epoch_running_time * (args.epoch - epoch)
+        print('epoch :', epoch, ' , running time :', epoch_running_time, 'm, eft estimate :', left_time, 'm')
 
     end_time = time.time()
     running_time = end_time - start_time

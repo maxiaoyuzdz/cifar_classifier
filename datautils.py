@@ -13,11 +13,13 @@ def verticalFlipTransform(img):
     return img
 
 def rotateTransform(img):
-    if np.random.randint(0, 2) == 1:
-        if np.random.randint(0, 2) == 1:
-            img = img.rotate(90)
-        else:
-            img = img.rotate(180)
+    rotate_type = np.random.randint(0, 3)
+    if rotate_type == 0:
+        return img
+    elif rotate_type == 1:
+        img = img.rotate(90)
+    elif rotate_type == 2:
+        img = img.rotate(180)
     return img
 
 def noiseTransform(img):
