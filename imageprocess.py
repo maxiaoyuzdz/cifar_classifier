@@ -13,6 +13,7 @@ import scipy.misc
 import matplotlib.pyplot as plt
 
 from PIL import ImageFilter
+import math
 
 
 def noisy(noise_typ,image):
@@ -86,6 +87,100 @@ def zoomTransform(img):
         return outimg
     return img
 
+
+def hsv2rgb(h, s, v):
+    h = float(h)
+    s = float(s)
+    v = float(v)
+    h60 = h / 60.0
+    h60f = math.floor(h60)
+    hi = int(h60f) % 6
+    f = h60 - h60f
+    p = v * (1 - s)
+    q = v * (1 - f * s)
+    t = v * (1 - (1 - f) * s)
+    r, g, b = 0, 0, 0
+    if hi == 0: r, g, b = v, t, p
+    elif hi == 1: r, g, b = q, v, p
+    elif hi == 2: r, g, b = p, v, t
+    elif hi == 3: r, g, b = p, q, v
+    elif hi == 4: r, g, b = t, p, v
+    elif hi == 5: r, g, b = v, p, q
+    r, g, b = int(r * 255), int(g * 255), int(b * 255)
+    return r, g, b
+
+def rgb2hsv(r, g, b):
+    r, g, b = r/255.0, g/255.0, b/255.0
+    mx = max(r, g, b)
+    mn = min(r, g, b)
+    df = mx-mn
+    if mx == mn:
+        h = 0
+    elif mx == r:
+        h = (60 * ((g-b)/df) + 360) % 360
+    elif mx == g:
+        h = (60 * ((b-r)/df) + 120) % 360
+    elif mx == b:
+        h = (60 * ((r-g)/df) + 240) % 360
+    if mx == 0:
+        s = 0
+    else:
+        s = df/mx
+    v = mx
+    return h, s, v
+
+
+def rgb_to_hsv(rgb):
+    # Translated from source of colorsys.rgb_to_hsv
+    # r,g,b should be a numpy arrays with values between 0 and 255
+    # rgb_to_hsv returns an array of floats between 0.0 and 1.0.
+    rgb = rgb.astype('float')
+    hsv = np.zeros_like(rgb)
+    # in case an RGBA array was passed, just copy the A channel
+    hsv[..., 3:] = rgb[..., 3:]
+    r, g, b = rgb[..., 0], rgb[..., 1], rgb[..., 2]
+    maxc = np.max(rgb[..., :3], axis=-1)
+    minc = np.min(rgb[..., :3], axis=-1)
+    hsv[..., 2] = maxc
+    mask = maxc != minc
+    hsv[mask, 1] = (maxc - minc)[mask] / maxc[mask]
+    rc = np.zeros_like(r)
+    gc = np.zeros_like(g)
+    bc = np.zeros_like(b)
+    rc[mask] = (maxc - r)[mask] / (maxc - minc)[mask]
+    gc[mask] = (maxc - g)[mask] / (maxc - minc)[mask]
+    bc[mask] = (maxc - b)[mask] / (maxc - minc)[mask]
+    hsv[..., 0] = np.select(
+        [r == maxc, g == maxc], [bc - gc, 2.0 + rc - bc], default=4.0 + gc - rc)
+    hsv[..., 0] = (hsv[..., 0] / 6.0) % 1.0
+    return hsv
+def hsv_to_rgb(hsv):
+    # Translated from source of colorsys.hsv_to_rgb
+    # h,s should be a numpy arrays with values between 0.0 and 1.0
+    # v should be a numpy array with values between 0.0 and 255.0
+    # hsv_to_rgb returns an array of uints between 0 and 255.
+    rgb = np.empty_like(hsv)
+    rgb[..., 3:] = hsv[..., 3:]
+    h, s, v = hsv[..., 0], hsv[..., 1], hsv[..., 2]
+    i = (h * 6.0).astype('uint8')
+    f = (h * 6.0) - i
+    p = v * (1.0 - s)
+    q = v * (1.0 - s * f)
+    t = v * (1.0 - s * (1.0 - f))
+    i = i % 6
+    conditions = [s == 0.0, i == 1, i == 2, i == 3, i == 4, i == 5]
+    rgb[..., 0] = np.select(conditions, [v, q, p, p, t, v], default=v)
+    rgb[..., 1] = np.select(conditions, [v, v, v, q, p, p], default=t)
+    rgb[..., 2] = np.select(conditions, [v, p, t, v, v, q], default=p)
+    return rgb.astype('uint8')
+
+
+def shift_hue(arr,hout):
+    hsv=rgb_to_hsv(arr)
+    hsv[...,0]=hout
+    rgb=hsv_to_rgb(hsv)
+    return rgb
+
 def main():
     img = Image.open('/media/maxiaoyu/data/training_data/images/macaw2.jpg')
     img.load()
@@ -97,6 +192,7 @@ def main():
     print(data[1, 1, 1])
 
     #zoom in
+    """
     zoom_scale = np.random.random((1,))[0]
     while zoom_scale > 0.3:
         zoom_scale = np.random.random((1,))[0]
@@ -108,10 +204,35 @@ def main():
     outimg = img.resize((outimg_w, outimg_h))
 
     outimg.show()
+    """
+
+
+    # hsv operation
+    random_factor2 = random.uniform(0.7, 1.4)
+    random_factor3 = random.uniform(-0.1, 1.0)
+    random_factor4 = random.uniform(-0.1, 1.0)
+    hsv = rgb_to_hsv(data)
+    print(hsv.shape)
+    for w in range(0, hsv.shape[0]):
+        for h in range(0, hsv.shape[1]):
+            s = hsv[w, h, 1]
+            s = s * random_factor2 + random_factor3
+            hsv[w, h, 1] = s
+
+            v = hsv[w, h, 2]
+            v = v * random_factor2 + random_factor3
+            hsv[w, h, 2] = v
+
+
+    hsv[:, :, 1] += random_factor4
+
+    rgbimg = hsv_to_rgb(hsv)
+    outimg = Image.fromarray(rgbimg, mode="RGB")
+    outimg.show()
+    print('show end')
 
     print('epoch : {0}, , running time : {1:.2f}m , left estimate : {2:.2f}m'.format(1, 0.345,
                                                                                      0.456))
-
 
     #blur
     #outimg = img.filter(ImageFilter.BLUR)
