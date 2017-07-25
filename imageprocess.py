@@ -14,6 +14,7 @@ import matplotlib.pyplot as plt
 
 from PIL import ImageFilter
 import math
+import colorsys
 
 
 def noisy(noise_typ,image):
@@ -141,6 +142,7 @@ def rgb_to_hsv(rgb):
     r, g, b = rgb[..., 0], rgb[..., 1], rgb[..., 2]
     maxc = np.max(rgb[..., :3], axis=-1)
     minc = np.min(rgb[..., :3], axis=-1)
+    # v
     hsv[..., 2] = maxc
     mask = maxc != minc
     hsv[mask, 1] = (maxc - minc)[mask] / maxc[mask]
@@ -213,6 +215,7 @@ def main():
     random_factor4 = random.uniform(-0.1, 1.0)
     hsv = rgb_to_hsv(data)
     print(hsv.shape)
+    """
     for w in range(0, hsv.shape[0]):
         for h in range(0, hsv.shape[1]):
             s = hsv[w, h, 1]
@@ -222,13 +225,49 @@ def main():
             v = hsv[w, h, 2]
             v = v * random_factor2 + random_factor3
             hsv[w, h, 2] = v
-
-
-    hsv[:, :, 1] += random_factor4
+    """
+    #s
+    hsv[:, :, 1] *= random_factor2
+    hsv[:, :, 1] += random_factor3
+    #v
+    hsv[:, :, 2] *= random_factor2
+    hsv[:, :, 2] += random_factor3
+    #h
+    hsv[:, :, 0] += random_factor4
 
     rgbimg = hsv_to_rgb(hsv)
     outimg = Image.fromarray(rgbimg, mode="RGB")
-    outimg.show()
+    outimg.show('one')
+
+    data2 = np.zeros(ds)
+    for wi in range(0, ds[0]):
+        for hi in range(0, ds[1]):
+            r = data[wi, hi, 0]
+            g = data[wi, hi, 1]
+            b = data[wi, hi, 2]
+            h, s, v = colorsys.rgb_to_hsv(r, g, b)
+            h += random_factor4
+
+            s *= random_factor2
+            s += random_factor3
+
+            v *= random_factor2
+            v += random_factor3
+            rn, gn, bn = colorsys.hsv_to_rgb(h, s, v)
+            #rn *= 255
+            #gn *= 255
+            #bn *= 255
+            data2[wi, hi, 0] = rn
+            data2[wi, hi, 1] = gn
+            data2[wi, hi, 2] = bn
+
+    outimg2 = Image.fromarray(data2, mode="RGB")
+    outimg2.show()
+
+    #ci = scipy.misc.toimage(data2, cmin=0.0, cmax=1.0)
+    #ci.show()
+
+
     print('show end')
 
     print('epoch : {0}, , running time : {1:.2f}m , left estimate : {2:.2f}m'.format(1, 0.345,
