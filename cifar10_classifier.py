@@ -190,7 +190,9 @@ def runTraining():
         epoch_end_time = time.time()
         epoch_running_time = (epoch_end_time - epoch_start_time) / 60
         left_time = epoch_running_time * (args.epoch - epoch)
-        print('epoch :', epoch, ' , running time :', epoch_running_time, 'm, left estimate :', left_time, 'm')
+        print('epoch : {0}, , running time : {1:.2f}m , left estimate : {2:.2f}m'.format(epoch, epoch_running_time,
+                                                                                         left_time))
+
 
     end_time = time.time()
     running_time = end_time - start_time

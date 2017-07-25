@@ -74,6 +74,18 @@ def sp_noise(image, prob):
                 output[i][j] = image[i][j]
     return output
 
+
+def zoomTransform(img):
+    zoom_type = np.random.randint(0, 3)
+    if zoom_type == 0:
+        return img
+    # zoom in
+    elif zoom_type == 1:
+        zoom_scale = np.random.random((1, ))[0]
+        outimg = img.resize((45, 45))
+        return outimg
+    return img
+
 def main():
     img = Image.open('/media/maxiaoyu/data/training_data/images/macaw2.jpg')
     img.load()
@@ -84,9 +96,21 @@ def main():
 
     print(data[1, 1, 1])
 
-    #zoom
-    outimg = img.resize((45, 45))
+    #zoom in
+    zoom_scale = np.random.random((1,))[0]
+    while zoom_scale > 0.3:
+        zoom_scale = np.random.random((1,))[0]
+
+
+    outimg_w = int(img.width * (1 + zoom_scale))
+    outimg_h = int(img.height * (1 + zoom_scale))
+
+    outimg = img.resize((outimg_w, outimg_h))
+
     outimg.show()
+
+    print('epoch : {0}, , running time : {1:.2f}m , left estimate : {2:.2f}m'.format(1, 0.345,
+                                                                                     0.456))
 
 
     #blur

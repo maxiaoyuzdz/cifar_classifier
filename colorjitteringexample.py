@@ -170,12 +170,28 @@ def blurTransform(img):
 
 
 def zoomTransform(img):
-    zoom_type = np.random.randint(0, 2)
+    zoom_type = np.random.randint(0, 3)
     if zoom_type == 0:
         return img
+    # zoom in
     elif zoom_type == 1:
+        zoom_scale = np.random.random((1,))[0]
+        while zoom_scale > 0.3:
+            zoom_scale = np.random.random((1,))[0]
 
-        outimg = img.resize((45, 45))
+        outimg_w = int(img.width * (1 + zoom_scale))
+        outimg_h = int(img.height * (1 + zoom_scale))
+        outimg = img.resize((outimg_w, outimg_h))
+        return outimg
+    # zoom out
+    elif zoom_type == 2:
+        zoom_scale = np.random.random((1,))[0]
+        while zoom_scale > 0.3:
+            zoom_scale = np.random.random((1,))[0]
+
+        outimg_w = int(img.width * (1 - zoom_scale))
+        outimg_h = int(img.height * (1 - zoom_scale))
+        outimg = img.resize((outimg_w, outimg_h))
         return outimg
     return img
 
