@@ -67,8 +67,8 @@ parser.add_argument('-ac', '--args_check_allow', type=str2bool, nargs='?',
 
 
 best_prec1 = 0
-training_loss_array = []
-validation_loss_array = []
+
+validation_accuracy_data = []
 
 
 def saveCheckPoint(state, is_best):
@@ -120,10 +120,29 @@ def adjustLearningRateControl(op, epoch):
     elif args.adjust_lr == 2:
         adjustLearningRateManually(op, epoch)
 
+def judgeStopTraining():
+    global validation_accuracy_data
+    va = np.array(validation_accuracy_data)
+    if va.size < 20:
+        return False
+    elif va.size >= 20:
+        epoch_section_std = []
+
+        for i in range(0, 4):
+
+
+        return True
+
+    return False
+
+
+
 
 def runTraining():
     global best_prec1
-    start_time = time.time()
+    global validation_accuracy_data
+
+    training_start_time = time.time()
     # prepare model, select from args
     net = cifarclassifier.__dict__[args.arch]()
     # model.features = torch.nn.DataParallel(model.features)
@@ -165,6 +184,12 @@ def runTraining():
                                                  shuffle=False, num_workers=args.loader_worker)
 
     for epoch in range(args.start_epoch, args.epoch):
+        # judge to stop training
+        if judgeStopTraining():
+            break
+
+
+
         # epoch time
         epoch_start_time = time.time()
         # adjust learning rate
@@ -198,9 +223,9 @@ def runTraining():
                                                                                          left_time))
 
 
-    end_time = time.time()
-    running_time = end_time - start_time
-    print('running time = ', running_time / 60, ' mins')
+    training_end_time = time.time()
+    training_running_time = training_end_time - training_start_time
+    print('total running time = ', training_running_time / 60, ' mins')
 
 
 def train(training_set_loader, model, criterion, optimizer, epoch):
