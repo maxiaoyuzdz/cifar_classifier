@@ -21,6 +21,51 @@ from PIL import ImageFilter
 
 
 
+def rgb_to_hsv(rgb):
+    # Translated from source of colorsys.rgb_to_hsv
+    # r,g,b should be a numpy arrays with values between 0 and 255
+    # rgb_to_hsv returns an array of floats between 0.0 and 1.0.
+    rgb = rgb.astype('float')
+    hsv = np.zeros_like(rgb)
+    # in case an RGBA array was passed, just copy the A channel
+    hsv[..., 3:] = rgb[..., 3:]
+    r, g, b = rgb[..., 0], rgb[..., 1], rgb[..., 2]
+    maxc = np.max(rgb[..., :3], axis=-1)
+    minc = np.min(rgb[..., :3], axis=-1)
+    # v
+    hsv[..., 2] = maxc
+    mask = maxc != minc
+    hsv[mask, 1] = (maxc - minc)[mask] / maxc[mask]
+    rc = np.zeros_like(r)
+    gc = np.zeros_like(g)
+    bc = np.zeros_like(b)
+    rc[mask] = (maxc - r)[mask] / (maxc - minc)[mask]
+    gc[mask] = (maxc - g)[mask] / (maxc - minc)[mask]
+    bc[mask] = (maxc - b)[mask] / (maxc - minc)[mask]
+    hsv[..., 0] = np.select(
+        [r == maxc, g == maxc], [bc - gc, 2.0 + rc - bc], default=4.0 + gc - rc)
+    hsv[..., 0] = (hsv[..., 0] / 6.0) % 1.0
+    return hsv
+def hsv_to_rgb(hsv):
+    # Translated from source of colorsys.hsv_to_rgb
+    # h,s should be a numpy arrays with values between 0.0 and 1.0
+    # v should be a numpy array with values between 0.0 and 255.0
+    # hsv_to_rgb returns an array of uints between 0 and 255.
+    rgb = np.empty_like(hsv)
+    rgb[..., 3:] = hsv[..., 3:]
+    h, s, v = hsv[..., 0], hsv[..., 1], hsv[..., 2]
+    i = (h * 6.0).astype('uint8')
+    f = (h * 6.0) - i
+    p = v * (1.0 - s)
+    q = v * (1.0 - s * f)
+    t = v * (1.0 - s * (1.0 - f))
+    i = i % 6
+    conditions = [s == 0.0, i == 1, i == 2, i == 3, i == 4, i == 5]
+    rgb[..., 0] = np.select(conditions, [v, q, p, p, t, v], default=v)
+    rgb[..., 1] = np.select(conditions, [v, v, v, q, p, p], default=t)
+    rgb[..., 2] = np.select(conditions, [v, p, t, v, v, q], default=p)
+    return rgb.astype('uint8')
+
 
 
 def imshow(img, title=None):
@@ -196,13 +241,37 @@ def zoomTransform(img):
     return img
 
 
+def hsvTransform(img):
+    if np.random.randint(0, 2) == 1:
+        random_factor2 = random.uniform(0.7, 1.4)
+        random_factor3 = random.uniform(-0.1, 1.0)
+        random_factor4 = random.uniform(-0.1, 1.0)
+        data = np.asarray(img)
+        hsv = rgb_to_hsv(data)
+        # s
+        hsv[:, :, 1] *= random_factor2
+        hsv[:, :, 1] += random_factor3
+        # v
+        hsv[:, :, 2] *= random_factor2
+        hsv[:, :, 2] += random_factor3
+        # h
+        hsv[:, :, 0] += random_factor4
+
+        rgb = hsv_to_rgb(hsv)
+        outimg = Image.fromarray(rgb, mode="RGB")
+        return outimg
+    return img
+
+
 def getTransformsForTest():
     return transforms.Compose([
         #transforms.Lambda(lambda x: verticalFlipTransform(x)),
         #transforms.Lambda(lambda x: rotateTransform(x)),
         #transforms.Lambda(lambda x: noiseTransform(x)),
 
-        transforms.Lambda(lambda x: zoomTransform(x)),
+
+        transforms.Lambda(lambda x: hsvTransform(x)),
+        #transforms.Lambda(lambda x: zoomTransform(x)),
         transforms.RandomHorizontalFlip(),
         transforms.RandomCrop(32, 4),
         # blur
@@ -219,7 +288,7 @@ def imgtest1():
     transforms = getTransformsForTest()
     data_set = torchvision.datasets.CIFAR10(root='/media/maxiaoyu/data/training_data',
                                             train=False, download=False, transform=transforms)
-    data_set_loader = torch.utils.data.DataLoader(data_set, batch_size=4,
+    data_set_loader = torch.utils.data.DataLoader(data_set, batch_size=128,
                                                   shuffle=False, num_workers=1)
 
     # inputs, targets = next(iter(data_set_loader))

@@ -17,3 +17,6 @@ python cifar10_classifier.py -a vgg16_bn -r False -e 400 -wda True -log q9.log -
 
 python cifar10_classifier.py -a vgg16_bn -r False -e 400 -wda True -log q10.log -sf q10_checkpoint.pth.tar
 1060 92.4%  216min
+
+use hsv
+python cifar10_classifier.py -a vgg16_bn -r False -e 400 -wda True -log q11.log -sf q11_checkpoint.pth.tar
