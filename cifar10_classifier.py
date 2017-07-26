@@ -60,6 +60,10 @@ parser.add_argument('-pf', '--print_freq', default=128, type=int)
 parser.add_argument('-sp', '--save_model_path', default='/media/maxiaoyu/data/checkpoint/')
 parser.add_argument('-sf', '--save_model_file', default='_checkpoint.pth.tar')
 parser.add_argument('-sbf', '--save_best_model_file', default='_best_checkpoint.pth.tar')
+# args parameters check
+parser.add_argument('-ac', '--args_check_allow', type=str2bool, nargs='?',
+                    const=True, default="False",
+                    help="Activate Print detail in running time.")
 
 
 best_prec1 = 0
@@ -291,10 +295,11 @@ def main():
     global args
     args = parser.parse_args()
     #check parameters
-    print('=====  Please Check Parameters  =====')
-    print(args)
-    print('=====================================')
-    input('Press Enter to Continue')
+    if args.args_check_allow is True:
+        print('=====  Please Check Parameters  =====')
+        print(args)
+        print('=====================================')
+        input('Press Enter to Continue')
     runTraining()
 
 
