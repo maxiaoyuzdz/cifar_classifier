@@ -20,3 +20,6 @@ python cifar10_classifier.py -a vgg16_bn -r False -e 400 -wda True -log q10.log 
 
 use hsv
 python cifar10_classifier.py -a vgg16_bn -r False -e 400 -wda True -log q11.log -sf q11_checkpoint.pth.tar
+
+hsv v h c 1080ti
+python cifar10_classifier.py -a vgg16_bn -r False -e 400 -log q12.log -sf q12_checkpoint.pth.tar

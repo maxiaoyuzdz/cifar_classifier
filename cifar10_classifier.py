@@ -39,8 +39,9 @@ parser.add_argument('-lr', '--learning_rate', default=0.1, type=float)
 parser.add_argument('-mu', '--momentum', default=0.9, type=float)
 
 parser.add_argument('-wda', '--weight_decay_allow', type=str2bool, nargs='?',
-                    const=True, default="False",
+                    const=True, default="True",
                     help="Activate L2 Regularization.")
+
 parser.add_argument('-wd', '--weight_decay', default=5e-4, type=float)
 
 parser.add_argument('-al', '--adjust_lr', default=1, type=int)
@@ -203,7 +204,7 @@ def runTraining():
 
     for epoch in range(args.start_epoch, args.epoch):
         # judge to stop training
-        if judgeStopTraining():
+        if judgeStopTraining(epoch):
             print('end training')
             break
 
