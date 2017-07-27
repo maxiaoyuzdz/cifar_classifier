@@ -35,7 +35,7 @@ parser.add_argument('-st', '--start_epoch', default=0, type=int)
 parser.add_argument('-e', '--epoch', default=300, type=int)
 parser.add_argument('-mb', '--mini_batch_size', default=128, type=int)
 parser.add_argument('-tb', '--test_batch_size', default=128, type=int)
-parser.add_argument('-lr', '--learning_rate', default=0.05, type=float)
+parser.add_argument('-lr', '--learning_rate', default=0.1, type=float)
 parser.add_argument('-mu', '--momentum', default=0.9, type=float)
 
 parser.add_argument('-wda', '--weight_decay_allow', type=str2bool, nargs='?',
@@ -120,18 +120,34 @@ def adjustLearningRateControl(op, epoch):
     elif args.adjust_lr == 2:
         adjustLearningRateManually(op, epoch)
 
-def judgeStopTraining():
+def judgeStopTraining(shouldv=20):
     global validation_accuracy_data
-    va = np.array(validation_accuracy_data)
-    if va.size < 20:
+    va = np.array(validation_accuracy_data)[::-1]
+    if va.size < shouldv:
         return False
-    elif va.size >= 20:
-        epoch_section_std = []
+    elif va.size >= shouldv:
+        max_va = va.max()
+        #print(max_va)
+        va_std = []
+        #print(va.size)
+        for index in np.arange(0, shouldv, 5):
+            #print(va[index: index + 5], va[index: index + 5].std())
+            va_std.append(va[index: index + 5].std())
 
-        for i in range(0, 4):
-
-
-        return True
+        # key 1
+        va_std_avg = np.mean(va_std)
+        #print(va_std_avg)
+        va_max_small = va[0:shouldv].max()
+        #print(va_max_small)
+        # key 2
+        max_dis = np.abs(max_va - va_max_small)
+        #print(max_dis)
+        if va_std_avg <= 0.07 and max_dis <= 0.2:
+            #print('end')
+            return True
+        else:
+            #print('not end')
+            return False
 
     return False
 
@@ -200,7 +216,9 @@ def runTraining():
 
         # evaluate on validation set
         val_loss, val_accuracy = validate(val_set_loader, net, criterion)
-
+        # save val_accuracy
+        validation_accuracy_data.append(val_accuracy)
+        # check best
         is_best = val_accuracy > best_prec1
         best_prec1 = max(val_accuracy, best_prec1)
 
