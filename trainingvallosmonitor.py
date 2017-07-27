@@ -6,6 +6,7 @@ import time
 import threading
 from logoperator import ReadLossLogByLineNum, ReadAllLossLog
 from datautils import str2array
+import numpy as np
 
 parser = argparse.ArgumentParser(description='Process training arguments')
 parser.add_argument('-t', '--work_type', default='s')
@@ -349,6 +350,20 @@ def showCompareGraphic():
         if checkfileexists(args.log_dir + log_file):
             epoch_data, m_data, training_loss_data, validation_loss_data, training_accuracy_data, validation_accuracy_data = \
                 ReadAllLossLog(args.log_dir + log_file)
+
+            # correct data length
+            max_epoch = np.max(epoch_data)
+            print(max_epoch)
+            if max_epoch < args.epoch_num:
+                for i in range(max_epoch + 1, args.epoch_num+1):
+                    epoch_data.append(i)
+                    m_data.append(m_data[-1])
+                    training_loss_data.append(training_loss_data[-1])
+                    validation_loss_data.append(validation_loss_data[-1])
+                    training_accuracy_data.append(training_accuracy_data[-1])
+                    validation_accuracy_data.append(validation_accuracy_data[-1])
+
+
             compare_epoch_data.append(epoch_data)
             compare_training_loss_data.append(training_loss_data)
             compare_validation_loss_data.append(validation_loss_data)
