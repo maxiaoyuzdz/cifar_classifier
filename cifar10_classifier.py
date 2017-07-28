@@ -71,6 +71,10 @@ best_prec1 = 0
 
 validation_accuracy_data = []
 
+limit_adjust_lr_count = 0
+
+current_limit_learning_rate = 1.0
+
 
 def saveCheckPoint(state, is_best):
     torch.save(state, args.save_model_path + args.arch + args.save_model_file)
@@ -94,36 +98,9 @@ def accuracy(output, target, topk=(1,)):
 
     return res
 
-
-
-def adjustLearningRatePeriodically(op, epoch):
-    lr = args.learning_rate * (args.adjust_rate ** (epoch // args.adjust_period))
-    print('new lr = ', lr, ' basic lr = ', args.learning_rate, ' epoch = ', epoch)
-    for param_group in op.param_groups:
-        param_group['lr'] = lr
-
-
-def adjustLearningRateManually(op, epoch):
-    if epoch >= 150:
-        lr = 0.01
-        if 150 <= epoch < 250:
-            lr = 0.01
-        elif epoch >= 250:
-            lr = 0.001
-        for param_group in op.param_groups:
-            param_group['lr'] = lr
-
-
-def adjustLearningRateControl(op, epoch):
-    if args.adjust_lr == 0:
-        pass
-    elif args.adjust_lr == 1:
-        adjustLearningRatePeriodically(op, epoch)
-    elif args.adjust_lr == 2:
-        adjustLearningRateManually(op, epoch)
-
-def judgeStopTraining(epoch, shouldv=20):
+def judgeStopTraining(op, epoch, shouldv=20):
     global validation_accuracy_data
+    global limit_adjust_lr_count
     if epoch % 5 == 0:
         va = np.array(validation_accuracy_data)[::-1]
         if va.size < shouldv:
@@ -147,12 +124,58 @@ def judgeStopTraining(epoch, shouldv=20):
             #print(max_dis)
             if va_std_avg <= 0.07 and max_dis <= 0.2:
                 #print('end')
-                return True
+                if limit_adjust_lr_count > 1:
+                    return True
+                else:
+                    limit_adjust_lr_count += 1
+                    adjustLearningRateForceDownOneLevel(op, epoch)
+                    return False
             else:
                 #print('not end')
                 return False
 
     return False
+
+
+def adjustLearningRateForceDownOneLevel(op, epoch):
+    global current_limit_learning_rate
+    new_factor = (epoch // args.adjust_period) + 1
+    lr = args.learning_rate * (args.adjust_rate ** new_factor)
+    current_limit_learning_rate = lr
+    print('force to use new lr = ', lr, ' basic lr = ', args.learning_rate, ' epoch = ', epoch)
+    for param_group in op.param_groups:
+        param_group['lr'] = lr
+
+
+def adjustLearningRatePeriodically(op, epoch):
+    global current_limit_learning_rate
+    lr = args.learning_rate * (args.adjust_rate ** (epoch // args.adjust_period))
+    if lr < current_limit_learning_rate:
+        print('auto adjust lr = ', lr, ' basic lr = ', args.learning_rate, ' epoch = ', epoch)
+        for param_group in op.param_groups:
+            param_group['lr'] = lr
+    else:
+        print('current limit lr is lower')
+
+
+def adjustLearningRateManually(op, epoch):
+    if epoch >= 150:
+        lr = 0.01
+        if 150 <= epoch < 250:
+            lr = 0.01
+        elif epoch >= 250:
+            lr = 0.001
+        for param_group in op.param_groups:
+            param_group['lr'] = lr
+
+
+def adjustLearningRateControl(op, epoch):
+    if args.adjust_lr == 0:
+        pass
+    elif args.adjust_lr == 1:
+        adjustLearningRatePeriodically(op, epoch)
+    elif args.adjust_lr == 2:
+        adjustLearningRateManually(op, epoch)
 
 
 
@@ -166,7 +189,7 @@ def runTraining():
     net = cifarclassifier.__dict__[args.arch]()
     # model.features = torch.nn.DataParallel(model.features)
     net.cuda()
-    cudnn.benchmark = True
+    #cudnn.benchmark = True
 
     criterion = nn.CrossEntropyLoss().cuda()
     if args.weight_decay_allow:
@@ -204,7 +227,7 @@ def runTraining():
 
     for epoch in range(args.start_epoch, args.epoch):
         # judge to stop training
-        if judgeStopTraining(epoch):
+        if judgeStopTraining(optimizer, epoch):
             print('end training')
             break
 

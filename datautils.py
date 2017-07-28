@@ -162,8 +162,8 @@ def getTransform():
 
 def getTransformsForTraining():
     return transforms.Compose([
-        transforms.Lambda(lambda x: hsvTransform(x)),
-        transforms.Lambda(lambda x: verticalFlipTransform(x)),
+        #transforms.Lambda(lambda x: hsvTransform(x)),
+        #transforms.Lambda(lambda x: verticalFlipTransform(x)),
         #transforms.Lambda(lambda x: rotateTransform(x)),
         #transforms.Lambda(lambda x: noiseTransform(x)),
         transforms.RandomHorizontalFlip(),
