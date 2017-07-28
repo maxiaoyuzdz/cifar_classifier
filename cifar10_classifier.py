@@ -365,10 +365,10 @@ def main():
     global args
     args = parser.parse_args()
     #check parameters
+    print('=====  Please Check Parameters  =====')
+    print(args)
+    print('=====================================')
     if args.args_check_allow is True:
-        print('=====  Please Check Parameters  =====')
-        print(args)
-        print('=====================================')
         input('Press Enter to Continue')
     runTraining()
 
