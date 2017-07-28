@@ -23,12 +23,12 @@ from averagemeter import AverageMeter
 
 parser = argparse.ArgumentParser(description='Process training arguments')
 
-parser.add_argument('-a', '--arch', default='vgg11')
+parser.add_argument('-a', '--arch', default='vgg16_bn')
 
 parser.add_argument('-r', '--resume', type=str2bool, nargs='?',
                     const=True, default="False",
                     help="Activate nice mode.")
-parser.add_argument('-rp', '--resume_path', default='/media/maxiaoyu/checkpoint/')
+parser.add_argument('-rp', '--resume_path', default='/media/maxiaoyu/checkpoint/cifar100/')
 parser.add_argument('-rf', '--resume_file', default='_checkpoint.pth.tar')
 
 parser.add_argument('-st', '--start_epoch', default=0, type=int)
@@ -48,7 +48,7 @@ parser.add_argument('-al', '--adjust_lr', default=1, type=int)
 parser.add_argument('-ap', '--adjust_period', default=30, type=int)
 parser.add_argument('-ar', '--adjust_rate', default=0.5, type=float)
 
-parser.add_argument('-logdir', '--log_dir', default='/media/maxiaoyu/data/Log/')
+parser.add_argument('-logdir', '--log_dir', default='/media/maxiaoyu/data/Log/cifar100/')
 parser.add_argument('-log', '--log_file_name', default='running.log')
 parser.add_argument('-d', '--data_path', default='/media/maxiaoyu/data/training_data')
 parser.add_argument('-w', '--loader_worker', default=4, type=int)
@@ -58,7 +58,7 @@ parser.add_argument('-pa', '--print_allow', type=str2bool, nargs='?',
                     help="Activate Print detail in running time.")
 parser.add_argument('-pf', '--print_freq', default=128, type=int)
 
-parser.add_argument('-sp', '--save_model_path', default='/media/maxiaoyu/data/checkpoint/')
+parser.add_argument('-sp', '--save_model_path', default='/media/maxiaoyu/data/checkpoint/cifar100/')
 parser.add_argument('-sf', '--save_model_file', default='_checkpoint.pth.tar')
 parser.add_argument('-sbf', '--save_best_model_file', default='_best_checkpoint.pth.tar')
 # args parameters check
