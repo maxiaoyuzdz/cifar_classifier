@@ -166,8 +166,8 @@ def getTransformsForTraining():
         #transforms.Lambda(lambda x: verticalFlipTransform(x)),
         #transforms.Lambda(lambda x: rotateTransform(x)),
         #transforms.Lambda(lambda x: noiseTransform(x)),
-        transforms.RandomHorizontalFlip(),
         transforms.RandomCrop(32, 4),
+        transforms.RandomHorizontalFlip(),
         transforms.ToTensor(),
         transforms.Normalize(mean=[0.485, 0.456, 0.406],
                              std=[0.229, 0.224, 0.225])
