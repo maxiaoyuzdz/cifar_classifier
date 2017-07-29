@@ -18,7 +18,7 @@ from torch.utils.data.sampler import RandomSampler, SubsetRandomSampler
 from logoperator import SaveLog
 
 
-import cifarclassifier
+import cifar100cnn
 from averagemeter import AverageMeter
 
 parser = argparse.ArgumentParser(description='Process training arguments')
@@ -186,7 +186,7 @@ def runTraining():
 
     training_start_time = time.time()
     # prepare model, select from args
-    net = cifarclassifier.__dict__[args.arch]()
+    net = cifar100cnn.__dict__[args.arch]()
     # model.features = torch.nn.DataParallel(model.features)
     net.cuda()
     #cudnn.benchmark = True
