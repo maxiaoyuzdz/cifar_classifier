@@ -187,9 +187,10 @@ def runTraining():
     training_start_time = time.time()
     # prepare model, select from args
     net = cifarclassifier.__dict__[args.arch]()
-    # model.features = torch.nn.DataParallel(model.features)
+    net.features = torch.nn.DataParallel(net.features)
     net.cuda()
     #cudnn.benchmark = True
+    #net = torch.nn.DataParallel(net).cuda()
 
     criterion = nn.CrossEntropyLoss().cuda()
     if args.weight_decay_allow:
