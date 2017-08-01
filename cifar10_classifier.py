@@ -189,8 +189,9 @@ def runTraining():
     net = cifarclassifier.__dict__[args.arch]()
     net.features = torch.nn.DataParallel(net.features)
     net.cuda()
+    # net = torch.nn.DataParallel(net).cuda()
     #cudnn.benchmark = True
-    #net = torch.nn.DataParallel(net).cuda()
+
 
     criterion = nn.CrossEntropyLoss().cuda()
     if args.weight_decay_allow:

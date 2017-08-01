@@ -41,3 +41,11 @@ python cifar10_classifier.py -a vgg16_bn -r False -e 400 -mb 2048 -tb 2048 -wd 6
 33.34m
 
 python cifar10_classifier.py -a vgg16_bn -r False -e 400 -mb 4096 -tb 4096 -wd 6e-4 -log wd06test3.log -sf wd06test3.pth.tar
+===============================================================================================================================
+python cifar100_classifier.py -a vgg16_bn -r False -e 400 -mb 1024 -tb 1024 -log bs1024w5lr1.log -sf bs1024w5lr1.pth.tar
+69%
+==
+python cifar100_classifier.py -a vgg19_bn -r False -e 400 -mb 1024 -tb 1024 -log avgg19bnbs1024w5lr1.log -sf avgg19bnbs1024w5lr1.pth.tar
+70%
+==
+python cifar100_classifier.py -a vgg20_bn -r False -e 400 -mb 1024 -tb 1024 -log avgg20bnbs1024w5lr1.log -sf avgg20bnbs1024w5lr1.pth.tar

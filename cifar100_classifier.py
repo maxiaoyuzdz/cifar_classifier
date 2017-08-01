@@ -187,8 +187,9 @@ def runTraining():
     training_start_time = time.time()
     # prepare model, select from args
     net = cifar100cnn.__dict__[args.arch]()
-    # model.features = torch.nn.DataParallel(model.features)
+    net.features = torch.nn.DataParallel(net.features)
     net.cuda()
+    # net = torch.nn.DataParallel(net).cuda()
     #cudnn.benchmark = True
 
     criterion = nn.CrossEntropyLoss().cuda()
@@ -213,14 +214,14 @@ def runTraining():
 
     # training set
     training_transforms = getTransformsForTraining()
-    training_set = torchvision.datasets.CIFAR10(root=args.data_path,
+    training_set = torchvision.datasets.CIFAR100(root=args.data_path,
                                                 train=True, download=False, transform=training_transforms)
     training_set_loader = torch.utils.data.DataLoader(training_set, batch_size=args.mini_batch_size,
                                                       shuffle=True, num_workers=args.loader_worker)
 
     # validation set
     validation_transforms = getTransformsForValidation()
-    val_set = torchvision.datasets.CIFAR10(root=args.data_path,
+    val_set = torchvision.datasets.CIFAR100(root=args.data_path,
                                            train=False, download=False, transform=validation_transforms)
     val_set_loader = torch.utils.data.DataLoader(val_set, batch_size=args.mini_batch_size,
                                                  shuffle=False, num_workers=args.loader_worker)

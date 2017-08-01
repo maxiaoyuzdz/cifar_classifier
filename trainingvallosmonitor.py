@@ -10,9 +10,9 @@ import numpy as np
 
 parser = argparse.ArgumentParser(description='Process training arguments')
 parser.add_argument('-t', '--work_type', default='s')
-parser.add_argument('-e', '--epoch_num', default=300, type=int)
+parser.add_argument('-e', '--epoch_num', default=400, type=int)
 parser.add_argument('-lm', '--loss_max', default=2.0, type=float)
-parser.add_argument('-logdir', '--log_dir', default='/media/maxiaoyu/data/Log/')
+parser.add_argument('-logdir', '--log_dir', default='/media/maxiaoyu/data/Log/cifar100/')
 parser.add_argument('-log', '--log_file_name', default='running.log')
 parser.add_argument('-f', '--update_freq', default=1.0, type=float)
 
