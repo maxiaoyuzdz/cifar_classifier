@@ -1,46 +1,4 @@
-python cifar10_classifier.py -a vgg11 -r False -e 400 -wda True -log q5.log -sf q5_checkpoint.pth.tar
 
-python cifar10_classifier.py -a vgg11_bn -r False -e 400 -wda True -log q6.log -sf q6_checkpoint.pth.tar
-
-python cifar10_classifier.py -a vgg11_bn2 -r False -e 400 -wda True -log q7.log -sf q7_checkpoint.pth.tar
-
-python trainingvallosmonitor.py -e 400 -log q4.log -t s
-
-python trainingvallosmonitor.py -e 400 -log q6.log -t d -f 0.05
-
-python cifar10_classifier.py -a vgg16 -r False -e 400 -wda True -log q7.log -sf q7_checkpoint.pth.tar
-1060 191min
-python cifar10_classifier.py -a vgg16_bn -r False -e 400 -wda True -log q8.log -sf q8_checkpoint.pth.tar
-1080ti 106min
-python cifar10_classifier.py -a vgg16_bn -r False -e 400 -wda True -log q9.log -sf q9_checkpoint.pth.tar
-1080ti 106 89%
-
-python cifar10_classifier.py -a vgg16_bn -r False -e 400 -wda True -log q10.log -sf q10_checkpoint.pth.tar
-1060 92.4%  216min
-
-use hsv
-python cifar10_classifier.py -a vgg16_bn -r False -e 400 -wda True -log q11.log -sf q11_checkpoint.pth.tar
-
-hsv v h c 1080ti
-python cifar10_classifier.py -a vgg16_bn -r False -e 400 -log q12.log -sf q12_checkpoint.pth.tar
-
-python cifar10_classifier.py -a vgg16_bn -r False -e 400 -mb 2048 -tb 2048 -log bs2048.log -sf bs2048.pth.tar
-
-python cifar10_classifier.py -a vgg16_bn -r False -e 400 -mb 4096 -tb 4096 -log bs4096.log -sf bs4096.pth.tar
-
-
-python cifar10_classifier.py -a vgg16_bn -r False -e 400 -mb 2048 -tb 2048 -log bs2048-3.log -sf bs2048-3.pth.tar
-
-
-
-
-python cifar10_classifier.py -a vgg16_bn -r False -e 400 -mb 2048 -tb 2048 -wd 6e-4 -log wd06test.log -sf wd06test.pth.tar
-31.33m
-
-python cifar10_classifier.py -a vgg16_bn -r False -e 400 -mb 2048 -tb 2048 -wd 6e-4 -log wd06test2.log -sf wd06test2.pth.tar
-33.34m
-
-python cifar10_classifier.py -a vgg16_bn -r False -e 400 -mb 4096 -tb 4096 -wd 6e-4 -log wd06test3.log -sf wd06test3.pth.tar
 ===============================================================================================================================
 python cifar100_classifier.py -a vgg16_bn -r False -e 400 -mb 1024 -tb 1024 -log bs1024w5lr1.log -sf bs1024w5lr1.pth.tar
 69%
@@ -49,3 +7,41 @@ python cifar100_classifier.py -a vgg19_bn -r False -e 400 -mb 1024 -tb 1024 -log
 70%
 ==
 python cifar100_classifier.py -a vgg20_bn -r False -e 400 -mb 1024 -tb 1024 -log avgg20bnbs1024w5lr1.log -sf avgg20bnbs1024w5lr1.pth.tar
+70%
+==
+add model test    vgg16 + 512 * 4
+python cifar100_classifier.py -a vgg_bn -r False -e 400 -mb 1024 -tb 1024 -log vggt1.log -sf vggt1.pth.tar
+fail 69%
+==
+vgg16 + 1024 * 4
+python cifar100_classifier.py -a vgg_bn -r False -e 400 -mb 1024 -tb 1024 -log vggt2.log -sf vggt2.pth.tar
+a litter better in training
+==
+vgg16 + 1024 * 8
+python cifar100_classifier.py -a vgg_bn -r False -e 400 -mb 1024 -tb 1024 -log vggt3.log -sf vggt3.pth.tar
+total error, high bias
+==
+vgg16 + 1024 * 4
+python cifar100_classifier.py -a vgg_bn_nd -r False -e 400 -wda False -mb 1024 -tb 1024 -log vggt4.log -sf vggt4.pth.tar
+overfitting
+==
+vgg16 + 1024 * 3 no bn no dropout
+python cifar100_classifier.py -a vgg_bn_nd -r False -e 400 -wda False -mb 1024 -tb 1024 -log vggt5.log -sf vggt5.pth.tar
+
+==
+vgg16 + 2048 * 4 no bn no dropout
+python cifar100_classifier.py -a vgg_bn_nd -r False -e 400 -wda False -mb 1024 -tb 1024 -log vggt6.log -sf vggt6.pth.tar
+better than 4
+==
+vgg16 + 4096 * 4 no bn no dropout
+python cifar100_classifier.py -a vgg_bn_nd -e 400 -wda False -mb 1024 -tb 1024 -log vggt7.log
+win
+vgg16 + 4096 * 3 no bn no dropout
+python cifar100_classifier.py -a vgg_bn_nd2 -e 400 -wda False -mb 1024 -tb 1024 -log vggt8.log
+
+===
+vgg16 + 8192 * 4 no bn no dropout
+python cifar100_classifier.py -a vgg_bn_nd -e 400 -wda False -mb 1024 -tb 1024 -log vggt9.log
+
+vgg16 + 8192 * 3 no bn no dropout
+python cifar100_classifier.py -a vgg_bn_nd2 -e 400 -wda False -mb 1024 -tb 1024 -log vggt10.log

@@ -66,6 +66,10 @@ parser.add_argument('-ac', '--args_check_allow', type=str2bool, nargs='?',
                     const=True, default="False",
                     help="Activate Print detail in running time.")
 
+parser.add_argument('-sa', '--save_best_allow', type=str2bool, nargs='?',
+                    const=True, default="False",
+                    help="Allow to save checkpoint.")
+
 
 best_prec1 = 0
 
@@ -90,6 +94,13 @@ def accuracy(output, target, topk=(1,)):
 
     _, pred = output.topk(maxk, 1, True, True)
     pred = pred.t()
+    """
+    print('=========')
+    print(pred)
+    print('---------')
+    print(target)
+    print('=========')
+    """
     correct = pred.eq(target.view(1, -1).expand_as(pred).long())
 
     res = []
@@ -187,9 +198,9 @@ def runTraining():
     training_start_time = time.time()
     # prepare model, select from args
     net = cifar100cnn.__dict__[args.arch]()
-    net.features = torch.nn.DataParallel(net.features)
+    #net.features = torch.nn.DataParallel(net.features)
     net.cuda()
-    # net = torch.nn.DataParallel(net).cuda()
+    #net = torch.nn.DataParallel(net).cuda()
     #cudnn.benchmark = True
 
     criterion = nn.CrossEntropyLoss().cuda()
@@ -254,13 +265,14 @@ def runTraining():
         SaveLog(epoch + 1, 5000, training_loss, val_loss, training_accuracy, val_accuracy,
                 args.log_dir + args.log_file_name)
         #save running model
-        saveCheckPoint({
-            'epoch': epoch + 1,
-            'arch': args.arch,
-            'state_dict': net.state_dict(),
-            'best_prec1': best_prec1,
-            'optimizer': optimizer.state_dict(),
-        }, is_best)
+        if args.save_best_allow:
+            saveCheckPoint({
+                'epoch': epoch + 1,
+                'arch': args.arch,
+                'state_dict': net.state_dict(),
+                'best_prec1': best_prec1,
+                'optimizer': optimizer.state_dict(),
+            }, is_best)
         print('save log end')
         epoch_end_time = time.time()
         epoch_running_time = (epoch_end_time - epoch_start_time) / 60
@@ -268,6 +280,8 @@ def runTraining():
         left_time = epoch_running_time * (args.epoch - epoch)
         print('epoch : {0}, running time : {1:.2f}m , have used : {2:.2f}m, left estimate : {3:.2f}m'.
               format(epoch, epoch_running_time, have_run_time, left_time))
+        print('train loss = {0:.2f}, val loss = {1:.2f}, train ac = {2:.2f}, val ac = {3:.2f}'.
+              format(training_loss, val_loss, training_accuracy, val_accuracy))
 
 
     training_end_time = time.time()
