@@ -9,7 +9,7 @@ python cifar100_classifier.py -a vgg16_bn -mb 1024 -tb 1024 -wd 5e-3 -log n6.log
 sleep 5m
 python cifar100_classifier.py -a vgg16_bn -mb 1024 -tb 1024 -wd 7e-3 -log n7.log
 sleep 5m
-python cifar100_classifier.py -a vgg16_bn -mb 1024 -tb 1024 -wd 9e-3 -log n9.log
+python cifar100_classifier.py -a vgg16_bn -mb 1024 -tb 1024 -wd 9e-3 -log n8.log
 sleep 5m
-python cifar100_classifier.py -a vgg16_bn -mb 1024 -tb 1024 -wd 1e-2 -log n10.log
+python cifar100_classifier.py -a vgg16_bn -mb 1024 -tb 1024 -wd 1e-2 -log n9.log
 sleep 5m
