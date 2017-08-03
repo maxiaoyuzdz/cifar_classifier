@@ -183,6 +183,8 @@ def adjustLearningRateManually(op, epoch):
 def adjustLearningRateControl(op, epoch):
     if args.adjust_lr == 0:
         pass
+        adjustLearningRateManually(op, epoch)
+        adjustLearningRateManually(op, epoch)
     elif args.adjust_lr == 1:
         adjustLearningRatePeriodically(op, epoch)
     elif args.adjust_lr == 2:
@@ -198,8 +200,11 @@ def runTraining():
     training_start_time = time.time()
     # prepare model, select from args
     net = cifar100cnn.__dict__[args.arch]()
+    # data parallel 1
     #net.features = torch.nn.DataParallel(net.features)
     net.cuda()
+
+    # data parallel 2
     #net = torch.nn.DataParallel(net).cuda()
     #cudnn.benchmark = True
 

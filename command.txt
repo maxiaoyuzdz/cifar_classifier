@@ -1,3 +1,5 @@
+python cifar10_classifier.py -a vgg16_bn -e 400 -log vgg16final.log -sf vgg16final.pth.tar
+
 
 ===============================================================================================================================
 python cifar100_classifier.py -a vgg16_bn -r False -e 400 -mb 1024 -tb 1024 -log bs1024w5lr1.log -sf bs1024w5lr1.pth.tar

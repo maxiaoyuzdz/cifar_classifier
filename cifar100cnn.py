@@ -67,20 +67,17 @@ class CNNModel100(nn.Module):
         self.features = features
         self.classifier = nn.Sequential(
             nn.Dropout(),
-            nn.Linear(512, 1024),
+            nn.Linear(512, 512),
             nn.ReLU(True),
             nn.Dropout(),
-            nn.Linear(1024, 1024),
+            nn.Linear(512, 512),
             nn.ReLU(True),
             # ====================
             nn.Dropout(),
-            nn.Linear(1024, 1024),
-            nn.ReLU(True),
-            nn.Dropout(),
-            nn.Linear(1024, 1024),
+            nn.Linear(512, 512),
             nn.ReLU(True),
             # ====================
-            nn.Linear(1024, 100),
+            nn.Linear(512, 100),
         )
 
         for m in self.modules():
@@ -98,22 +95,19 @@ class CNNModel100(nn.Module):
         return x
 
 
-class CNNMode100ND(nn.Module):
+class CNNModel100ND(nn.Module):
     def __init__(self, features):
-        super(CNNMode100ND, self).__init__()
+        super(CNNModel100ND, self).__init__()
         self.features = features
         self.classifier = nn.Sequential(
-            nn.Linear(512, 8192),
+            nn.Dropout(),
+            nn.Linear(512, 512),
             nn.ReLU(True),
-            nn.Linear(8192, 8192),
-            nn.ReLU(True),
-            # ====================
-            nn.Linear(8192, 8192),
-            nn.ReLU(True),
-            nn.Linear(8192, 8192),
+            nn.Dropout(),
+            nn.Linear(512, 512),
             nn.ReLU(True),
             # ====================
-            nn.Linear(8192, 100),
+            nn.Linear(512, 100),
         )
 
         for m in self.modules():
@@ -129,38 +123,6 @@ class CNNMode100ND(nn.Module):
         # print(' parameter2 = ', x.size())
         x = self.classifier(x)
         return x
-
-class CNNMode100ND2(nn.Module):
-    def __init__(self, features):
-        super(CNNMode100ND2, self).__init__()
-        self.features = features
-        self.classifier = nn.Sequential(
-            nn.Linear(512, 8192),
-            nn.ReLU(True),
-            nn.Linear(8192, 8192),
-            nn.ReLU(True),
-            # ====================
-            nn.Linear(8192, 8192),
-            nn.ReLU(True),
-            # ====================
-            nn.Linear(8192, 100),
-        )
-
-        for m in self.modules():
-            if isinstance(m, nn.Conv2d):
-                n = m.kernel_size[0] * m.kernel_size[1] * m.out_channels
-                m.weight.data.normal_(0, math.sqrt(2. / n))
-                m.bias.data.zero_()
-
-    def forward(self, x):
-        x = self.features(x)
-        # print(' parameter1 = ', x.size())
-        x = x.view(x.size(0), -1)
-        # print(' parameter2 = ', x.size())
-        x = self.classifier(x)
-        return x
-
-
 
 
 def vgg11():
@@ -186,7 +148,5 @@ def vgg_bn():
     return CNNModel100(make_layers(cfg['D'], batch_norm=True))
 # no dropout
 def vgg_bn_nd():
-    return CNNMode100ND(make_layers(cfg['D']))
+    return CNNModel100ND(make_layers(cfg['D'], batch_norm=True))
 
-def vgg_bn_nd2():
-    return CNNMode100ND2(make_layers(cfg['D']))
