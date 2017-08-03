@@ -23,12 +23,16 @@ from averagemeter import AverageMeter
 
 parser = argparse.ArgumentParser(description='Process training arguments')
 
+parser.add_argument('-dpa', '--dataparallel_allow',type=str2bool, nargs='?',
+                    const=True, default="False",
+                    help="Activate Print detail in running time.")
+
 parser.add_argument('-a', '--arch', default='vgg16_bn')
 
 parser.add_argument('-r', '--resume', type=str2bool, nargs='?',
                     const=True, default="False",
                     help="Activate nice mode.")
-parser.add_argument('-rp', '--resume_path', default='/media/maxiaoyu/checkpoint/cifar100/')
+parser.add_argument('-rp', '--resume_path', default='/media/maxiaoyu/data/checkpoint/cifar100/')
 parser.add_argument('-rf', '--resume_file', default='_checkpoint.pth.tar')
 
 parser.add_argument('-st', '--start_epoch', default=0, type=int)
@@ -201,7 +205,8 @@ def runTraining():
     # prepare model, select from args
     net = cifar100cnn.__dict__[args.arch]()
     # data parallel 1
-    #net.features = torch.nn.DataParallel(net.features)
+    if args.dataparallel_allow:
+        net.features = torch.nn.DataParallel(net.features)
     net.cuda()
 
     # data parallel 2

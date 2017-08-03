@@ -7,12 +7,7 @@ import math
 cfg = {
     'A': [64, 'M', 128, 'M', 256, 256, 'M', 512, 512, 'M', 512, 512, 'M'],
     'D': [64, 64, 'M', 128, 128, 'M', 256, 256, 256, 'M', 512, 512, 512, 'M', 512, 512, 512, 'M'],
-
-
     'E': [64, 64, 'M', 128, 128, 'M', 256, 256, 256, 256, 'M', 512, 512, 512, 512, 'M', 512, 512, 512, 512, 'M'],
-
-    'F': [64, 64, 'M', 128, 128, 'M', 256, 256, 256, 256, 'M', 512, 512, 512, 512, 'M', 1024, 1024, 1024, 1024, 'M'],
-
 }
 
 
@@ -61,9 +56,9 @@ class CNNModel(nn.Module):
         return x
 
 
-class CNNModel100(nn.Module):
+class CNNModelDeep(nn.Module):
     def __init__(self, features):
-        super(CNNModel100, self).__init__()
+        super(CNNModelDeep, self).__init__()
         self.features = features
         self.classifier = nn.Sequential(
             nn.Dropout(),
@@ -95,19 +90,19 @@ class CNNModel100(nn.Module):
         return x
 
 
-class CNNModel100ND(nn.Module):
+class CNNModelWide(nn.Module):
     def __init__(self, features):
-        super(CNNModel100ND, self).__init__()
+        super(CNNModelWide, self).__init__()
         self.features = features
         self.classifier = nn.Sequential(
             nn.Dropout(),
-            nn.Linear(512, 512),
+            nn.Linear(512, 1024),
             nn.ReLU(True),
             nn.Dropout(),
-            nn.Linear(512, 512),
+            nn.Linear(1024, 1024),
             nn.ReLU(True),
             # ====================
-            nn.Linear(512, 100),
+            nn.Linear(1024, 100),
         )
 
         for m in self.modules():
@@ -124,7 +119,8 @@ class CNNModel100ND(nn.Module):
         x = self.classifier(x)
         return x
 
-
+# for cifar100
+"""
 def vgg11():
     return CNNModel(make_layers(cfg['A']))
 
@@ -136,17 +132,15 @@ def vgg16():
 
 def vgg16_bn():
     return CNNModel(make_layers(cfg['D'], batch_norm=True))
+"""
 
-def vgg19_bn():
-    return CNNModel(make_layers(cfg['E'], batch_norm=True))
+# for cifar100
+def vgg16_bn():
+    return CNNModelDeep(make_layers(cfg['D'], batch_norm=True))
 
-def vgg20_bn():
-    return CNNModel100(make_layers(cfg['F'], batch_norm=True))
+def vgg16_bn_deep():
+    return CNNModelDeep(make_layers(cfg['D'], batch_norm=True))
 
-# for cifar100 new
-def vgg_bn():
-    return CNNModel100(make_layers(cfg['D'], batch_norm=True))
-# no dropout
-def vgg_bn_nd():
-    return CNNModel100ND(make_layers(cfg['D'], batch_norm=True))
+def vgg16_bn_wide():
+    return CNNModelWide(make_layers(cfg['D'], batch_norm=True))
 

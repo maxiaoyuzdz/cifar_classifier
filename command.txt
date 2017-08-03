@@ -20,32 +20,3 @@ fail 69%
 vgg16 + 1024 * 4
 python cifar100_classifier.py -a vgg_bn -r False -e 400 -mb 1024 -tb 1024 -log vggt2.log -sf vggt2.pth.tar
 a litter better in training
-==
-vgg16 + 1024 * 8
-python cifar100_classifier.py -a vgg_bn -r False -e 400 -mb 1024 -tb 1024 -log vggt3.log -sf vggt3.pth.tar
-total error, high bias
-==
-vgg16 + 1024 * 4
-python cifar100_classifier.py -a vgg_bn_nd -r False -e 400 -wda False -mb 1024 -tb 1024 -log vggt4.log -sf vggt4.pth.tar
-overfitting
-==
-vgg16 + 1024 * 3 no bn no dropout
-python cifar100_classifier.py -a vgg_bn_nd -r False -e 400 -wda False -mb 1024 -tb 1024 -log vggt5.log -sf vggt5.pth.tar
-
-==
-vgg16 + 2048 * 4 no bn no dropout
-python cifar100_classifier.py -a vgg_bn_nd -r False -e 400 -wda False -mb 1024 -tb 1024 -log vggt6.log -sf vggt6.pth.tar
-better than 4
-==
-vgg16 + 4096 * 4 no bn no dropout
-python cifar100_classifier.py -a vgg_bn_nd -e 400 -wda False -mb 1024 -tb 1024 -log vggt7.log
-win
-vgg16 + 4096 * 3 no bn no dropout
-python cifar100_classifier.py -a vgg_bn_nd2 -e 400 -wda False -mb 1024 -tb 1024 -log vggt8.log
-
-===
-vgg16 + 8192 * 4 no bn no dropout
-python cifar100_classifier.py -a vgg_bn_nd -e 400 -wda False -mb 1024 -tb 1024 -log vggt9.log
-
-vgg16 + 8192 * 3 no bn no dropout
-python cifar100_classifier.py -a vgg_bn_nd2 -e 400 -wda False -mb 1024 -tb 1024 -log vggt10.log

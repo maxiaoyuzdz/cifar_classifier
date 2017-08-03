@@ -187,7 +187,7 @@ def runTraining():
     training_start_time = time.time()
     # prepare model, select from args
     net = cifarclassifier.__dict__[args.arch]()
-    #net.features = torch.nn.DataParallel(net.features)
+    net.features = torch.nn.DataParallel(net.features)
     net.cuda()
     # net = torch.nn.DataParallel(net).cuda()
     #cudnn.benchmark = True
