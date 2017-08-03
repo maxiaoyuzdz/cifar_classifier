@@ -143,7 +143,7 @@ def vgg19_bn():
 def vgg20_bn():
     return CNNModel100(make_layers(cfg['F'], batch_norm=True))
 
-# for cifar100
+# for cifar100 new
 def vgg_bn():
     return CNNModel100(make_layers(cfg['D'], batch_norm=True))
 # no dropout
