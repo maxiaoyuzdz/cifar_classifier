@@ -353,6 +353,37 @@ class CNNModelWide8(nn.Module):
         # print(' parameter2 = ', x.size())
         x = self.classifier(x)
         return x
+
+class CNNModelST(nn.Module):
+    def __init__(self, features):
+        super(CNNModelST, self).__init__()
+        self.features = features
+        self.classifier = nn.Sequential(
+            nn.Dropout(),
+            nn.Linear(25088, 4096),
+            nn.ReLU(True),
+            nn.Dropout(),
+            nn.Linear(4096, 4096),
+            nn.ReLU(True),
+            # ====================
+            nn.Linear(4096, 100),
+        )
+
+        for m in self.modules():
+            if isinstance(m, nn.Conv2d):
+                n = m.kernel_size[0] * m.kernel_size[1] * m.out_channels
+                m.weight.data.normal_(0, math.sqrt(2. / n))
+                m.bias.data.zero_()
+
+    def forward(self, x):
+        x = self.features(x)
+        # print(' parameter1 = ', x.size())
+        x = x.view(x.size(0), -1)
+        # print(' parameter2 = ', x.size())
+        x = self.classifier(x)
+        return x
+
+
 # for cifar100
 """
 def vgg11():
@@ -406,3 +437,7 @@ def vgg16_bn_wide8():
 def vgg19_bn_wide5():
     return CNNModelWide5(make_layers(cfg['E'], batch_norm=True))
 
+
+
+def vgg16_bn_st():
+    return CNNModelST(make_layers(cfg['D'], batch_norm=True))
